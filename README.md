@@ -20,7 +20,7 @@ Das Relais hängt an Port 12, die Status LED an Port 13 und der Button an Port 0
 
 Das Relais hängt an Port 5, die Status LED an Port 4 und der Button an Port 13. Um den Button zu benutzen muß der Mode auf INPUT_PULLUP gesetzt werden (Eingang mit internen Pullupwiederstand).
 
-Zur Verbindung mit dem Rechenr benutze ich ein USB-to-Seriel-Adapter. Dort ist TX,RX,GND und 3,3V gefordert.
+Zur Verbindung mit dem Recher benutze ich ein USB-to-Seriel-Adapter. Dort ist TX, RX, GND und 3,3V gefordert, keinesfalls darf der ESP eine höhere Spannung als 3,3V bekommen!
 
 # Quellen und Inspirationen
 folgende Bibliothecken wurden verwendet:
