@@ -60,6 +60,6 @@ Wenn die Dose erfolgreich programmiert wurde, sind die Daten im Ordner www-data 
 
 ![](https://github.com/polygontwist/ESP_sonoff_Schaltuhr/blob/master/bilder/screen01.png)
 
-Hier habe ich schon Zeitpunkte definiert, diese werden in der Date timer.txt abgelegt.
+Hier habe ich schon Zeitpunkte definiert, diese werden in der Datei timer.txt abgelegt.
 
 
