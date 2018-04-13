@@ -12,10 +12,12 @@ Alternative Firmware für WLAN-Steckdosen (Sonoff, Horskey, Lingan SWA1) mit fol
 ja nach Schaltdose sind die Pins zu seriellen Verbindung zu finden:
 ## Sonoff S20
 ![](https://raw.githubusercontent.com/polygontwist/ESP_sonoff_Schaltuhr/master/bilder/sonoff_platine.png)
+
 Das Relais hängt an Port 12, die Status LED an Port 13 und der Button an Port 0.
 
 ## HORSKEY Wifi
 ![](https://raw.githubusercontent.com/polygontwist/ESP_sonoff_Schaltuhr/master/bilder/platine_horsky_Lingan-SWA1.png)
+
 Das Relais hängt an Port 5, die Status LED an Port 4 und der Button an Port 13. Um den Button zu benutzen muß der Mode auf INPUT_PULLUP gesetzt werden (Eingang mit internen Pullupwiederstand).
 
 Zur Verbindung mit dem Rechenr benutze ich ein USB-to-Seriel-Adapter. Dort ist TX,RX,GND und 3,3V gefordert.
