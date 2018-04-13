@@ -62,7 +62,7 @@ Ist der Steckdose erfolgreich im heimischen Netz können weitere updates per OTA
 ![](https://github.com/polygontwist/ESP_sonoff_Schaltuhr/blob/master/bilder/ota-port.png)
 
 # Oberfläche nach den upload von CSS & JS
-Wenn die Dose erfolgreich programmiert wurde, sind die Daten im Ordner www-data mit der upload-Funktion hochzuladen. Ist dies erfolgt, sieht das ganze etwas so aus:
+Wenn die Dose erfolgreich programmiert wurde, sind die Daten im Ordner www-data mit der upload-Funktion hochzuladen. Wer möchte kann das natürlich je nach Bedarf anpassen. Ist dies erfolgt, sieht das ganze etwa so aus:
 
 ![](https://github.com/polygontwist/ESP_sonoff_Schaltuhr/blob/master/bilder/screen01.png)
 
