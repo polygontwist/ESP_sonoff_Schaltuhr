@@ -21,6 +21,14 @@ Das Relais hängt an Port 5, die Status LED an Port 4 und der Button an Port 13.
 Zur Verbindung mit dem Rechenr benutze ich ein USB-to-Seriel-Adapter. Dort ist TX,RX,GND und 3,3V gefordert.
 
 # Quellen und Inspirationen
+folgende Bibliothecken wurden verwendet:
+* JeVe_EasyOTA https://github.com/jeroenvermeulen/JeVe_EasyOTA/
+* ESP8266WiFi
+* WiFiClient
+* ESP8266WebServer
+* time
+* FS (SPIFFS)
+
 folgende Projekte waren für die Entwicklung hilfreich: 
 * https://github.com/arendst/Sonoff-Tasmota/wiki
 * http://tinkerman.cat/s20-smart-socket/#lightbox-gallery-pgrT/4/
@@ -47,6 +55,9 @@ Ist der Steckdose erfolgreich im heimischen Netz können weitere updates per OTA
 
 # Oberfläche nach den upload von CSS & JS
 Wenn die Dose erfolgreich programmiert wurde, sind die Daten im Ordner www-data mit der upload-Funktion hochzuladen. Ist dies erfolgt, sieht das ganze etwas so aus:
+
 ![](https://github.com/polygontwist/ESP_sonoff_Schaltuhr/blob/master/bilder/screen01.png)
+
 Hier habe ich schon Zeitpunkte definiert, diese werden in der Date timer.txt abgelegt.
+
 
