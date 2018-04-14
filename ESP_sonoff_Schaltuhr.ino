@@ -19,6 +19,11 @@
 #include <ESP8266WebServer.h>
 #include <time.h>
 
+//https://github.com/xoseperez/hlw8012
+//or CSE7759
+#include <HLW8012.h>
+
+
 #include <JeVe_EasyOTA.h>  // https://github.com/jeroenvermeulen/JeVe_EasyOTA/blob/master/JeVe_EasyOTA.h
 #include "FS.h"
 
@@ -27,35 +32,46 @@ myNTP oNtp;
 
 #include "data.h" //index.htm
 
-const char* progversion  = "WLan-Timer V1.7";//ota fs ntp ti getpin
+const char* progversion  = "WLan-Timer V1.8";//ota fs ntp ti getpin HLW8012
 
 //----------------------------------------------------------------------------------------------
 
-/*
 #define ARDUINO_HOSTNAME  "sonoffpow" //http://sonoffpow.wg
-#define pin_relais 12 //blue+relais   true=on
-#define pin_led 13    //green         false=on      
+#define pin_relais 12 //red+relais   true=on
+#define pin_led 15    //blue          
+#define pin_ledinvert false    //      true=on      
 #define pin_Button 0  //Button        LOW=down 
-// =mess
 #define buttMode INPUT
-*/
+//https://github.com/erniberni/ESP_pow/blob/master/ESP_pow_with_OTA.ino
+//https://github.com/xoseperez/hlw8012
+#define SEL_PIN    5
+#define CF1_PIN   13
+#define CF_PIN    14
+
 
 /*
 #define ARDUINO_HOSTNAME  "sonoffs20" //http://sonoffs20.wg
-//#define ARDUINO_HOSTNAME  "sonoffpow" //http://sonoffpow.wg
-#define pin_relais 12 //blue+relais   true=on
-#define pin_led 13    //green         false=on      
-#define pin_Button 0  //Button        LOW=down  
+#define pin_relais 12               //blue+relais   true=on
+#define pin_led 13                  //green         false=on      
+#define pin_ledinvert true          //false=on      
+#define pin_Button 0                //Button        LOW=down  
 #define buttMode INPUT
+#define SEL_PIN   -1                //-= kein
+#define CF1_PIN   -1
+#define CF_PIN    -1
 */
 
-
+/*
 #define ARDUINO_HOSTNAME  "horsky"//
 #define pin_relais 5              //red+relais   true=on
 #define pin_led 4                 //blue         false=on
+#define pin_ledinvert true          //false=on      
 #define pin_Button 13             //Button     LOW=down
 #define buttMode INPUT_PULLUP     //!
-
+#define SEL_PIN   -1              //-= kein
+#define CF1_PIN   -1
+#define CF_PIN    -1
+*/
 //----------------------------------------------------------------------------------------------
 
 //#define WIFI_SSID         ""
@@ -74,6 +90,9 @@ unsigned long tim_zeitchecker= 15*1000;//alle 15sec Timer checken
 unsigned long tim_previousMillis=0;
 byte last_minute;
 
+#define UPDATE_TIMEHLW8012 2000       //alle 2 Secunden messen
+unsigned long UPDATE_TIMEHLW8012_previousMillis=0;
+
 #define actionheader "HTTP/1.1 303 OK\r\nLocation:/index.htm\r\nCache-Control: no-cache\r\n\r\n"
 
 uint8_t MAC_array[6];
@@ -84,6 +103,16 @@ String macadresse="";
 EasyOTA OTA;
 ESP8266WebServer server(80);
 File fsUploadFile;                      //Hält den aktuellen Upload
+
+
+//hlw8012 / CSE7759 setup
+#define CURRENT_MODE HIGH
+#define CURRENT_RESISTOR                0.001
+#define VOLTAGE_RESISTOR_UPSTREAM       ( 5 * 470000 ) // Real: 2280k
+#define VOLTAGE_RESISTOR_DOWNSTREAM     ( 1000 ) // Real 1.009k
+
+HLW8012 hlw8012;
+
 
 //---------------------------------------------
 //format bytes
@@ -98,6 +127,25 @@ String formatBytes(size_t bytes) {
     return String(bytes / 1024.0 / 1024.0 / 1024.0) + "GB";
   }
 }
+
+//---------------------------------------------
+void setLED(bool an){
+  if(pin_ledinvert)an=!an;
+  digitalWrite(pin_led, an);
+}
+void toogleLED(){
+  digitalWrite(pin_led, !digitalRead(pin_led));
+}
+
+bool getLED(){
+  if(pin_ledinvert){
+     return digitalRead(pin_led)==LOW;
+    }
+    else{
+     return digitalRead(pin_led)==HIGH;
+    }
+}
+
 //---------------------------------------------
 
 void setup() {
@@ -118,11 +166,24 @@ void setup() {
 
   //Power ON:
   digitalWrite(pin_relais,false);//relay off
-  digitalWrite(pin_led, false);  //LED on
+  setLED(true);  //LED on
+
+  //Initialize HLW8012/ CSE7759
+  if(SEL_PIN>-1){
+    hlw8012.begin(CF_PIN, CF1_PIN, SEL_PIN, CURRENT_MODE, false, 500000);
+    hlw8012.setResistors(CURRENT_RESISTOR, VOLTAGE_RESISTOR_UPSTREAM, VOLTAGE_RESISTOR_DOWNSTREAM);
+
+    Serial.print("[HLW] Default current multiplier : "); Serial.println(hlw8012.getCurrentMultiplier());// 14484.49    14484.49
+    Serial.print("[HLW] Default voltage multiplier : "); Serial.println(hlw8012.getVoltageMultiplier());//408636.51   447554.28
+    Serial.print("[HLW] Default power multiplier   : "); Serial.println(hlw8012.getPowerMultiplier());//10343611.74 10343611.74
+    Serial.println(); 
+  }
+
 
   //OTA
   OTA.onMessage([](char *message, int line) {
-    digitalWrite(pin_led, !digitalRead(pin_led));//Staus LED blinken
+    toogleLED();
+    //digitalWrite(pin_led, !digitalRead(pin_led));//Staus LED blinken
     Serial.println(message);
   });
   OTA.setup(WIFI_SSID, WIFI_PASSWORD, ARDUINO_HOSTNAME);//connect to WLAN
@@ -160,7 +221,8 @@ void setup() {
   Serial.println("HTTP server started");
   
   //info-LED aus
-  digitalWrite(pin_led, true);
+  setLED(false);
+  //digitalWrite(pin_led, true);
   Serial.println("ready.");
 
   //NTP start
@@ -184,22 +246,23 @@ void loop() {
      
      if (buttonstate == HIGH) {//up
         if( buttpresstime>0){
-           digitalWrite(pin_led, true);//LED off
+           setLED(false);
+           //digitalWrite(pin_led, true);//LED off
            Serial.println(buttpresstime);
            if(buttpresstime>6000){//ca. 6 sec
               Serial.println("Restart ESP");
               //restart
-              digitalWrite(pin_led, false);
+              setLED(true);
               delay(500);
-              digitalWrite(pin_led, true);
+              setLED(false);
               delay(500);
-              digitalWrite(pin_led, false);
+              setLED(true);
               delay(500);
-              digitalWrite(pin_led, true);
+              setLED(false);
               delay(500);
-              digitalWrite(pin_led, false);
+              setLED(true);
               delay(500);
-              digitalWrite(pin_led, true);
+              setLED(false);
               delay(500);
               ESP.restart();
            }
@@ -214,9 +277,11 @@ void loop() {
       }
       else
       {//down
-        digitalWrite(pin_led, false);//LED an
         buttpresstime+=butt_zeitchecker;//Zeit merken +=120ms
-        //digitalWrite(pin_Button, false);
+        if(buttpresstime>6000)
+              toogleLED();
+            else
+              setLED(true);//LED an
        }
   }
  
@@ -228,6 +293,25 @@ void loop() {
         last_minute=oNtp.getminute();
      }
    }
+
+ //HLW8012  
+  if(SEL_PIN>-1){
+    if(currentMillis - UPDATE_TIMEHLW8012_previousMillis > UPDATE_TIMEHLW8012){
+      UPDATE_TIMEHLW8012_previousMillis = currentMillis;
+      /*
+      Serial.print("[HLW] Active Power (W)    : "); Serial.println(hlw8012.getActivePower());
+      Serial.print("[HLW] Voltage (V)         : "); Serial.println(hlw8012.getVoltage());
+      Serial.print("[HLW] Current (A)         : "); Serial.println(hlw8012.getCurrent());
+      Serial.print("[HLW] Apparent Power (VA) : "); Serial.println(hlw8012.getApparentPower());
+      Serial.print("[HLW] Power Factor (%)    : "); Serial.println((int) (100 * hlw8012.getPowerFactor()));
+      Serial.println();
+      */
+      // When not using interrupts we have to manually switch to current or voltage monitor
+       hlw8012.toggleMode();
+    }
+    
+ }
+
 
 /*//TODO ?
  if ( WiFi.status() != WL_CONNECTED ){
@@ -363,6 +447,53 @@ void checktimer(){
   }  
 }
 
+//--------------Power--------------------
+void unblockingDelay(unsigned long mseconds) {
+    unsigned long timeout = millis();
+    while ((millis() - timeout) < mseconds) delay(1);
+}
+void calibrate(float last) {
+    // Let's first read power, current and voltage
+    // with an interval in between to allow the signal to stabilise:
+
+    hlw8012.getActivePower();
+
+    hlw8012.setMode(MODE_CURRENT);
+    unblockingDelay(2000);
+    hlw8012.getCurrent();
+
+    hlw8012.setMode(MODE_VOLTAGE);
+    unblockingDelay(2000);
+    hlw8012.getVoltage();
+
+    // Calibrate using a 60W bulb (pure resistive) on a 230V line
+    hlw8012.expectedActivePower(last);//
+    hlw8012.expectedVoltage(230.0);
+    hlw8012.expectedCurrent(last / 230.0);
+
+    // Show corrected factors
+    Serial.print("[HLW] New current multiplier : "); Serial.println(hlw8012.getCurrentMultiplier());
+    Serial.print("[HLW] New voltage multiplier : "); Serial.println(hlw8012.getVoltageMultiplier());
+    Serial.print("[HLW] New power multiplier   : "); Serial.println(hlw8012.getPowerMultiplier());
+    Serial.println();
+
+    /*
+    //   14484.49    
+    //  408636.51  
+    //10343611.74 
+
+    14w
+    "currentmultiplier":14484.49,
+    "voltagemultiplier":447554.28,
+    "powermultiplier":10343611.74
+
+    2000w
+    "currentmultiplier":   17513.04,
+    "voltagemultiplier":  463682.36,
+    "powermultiplier":  13485804.09,
+    */
+}
+
 
 
 //------------Data IO--------------------
@@ -444,21 +575,72 @@ void handleData(){// data.json
   message +=",\r\n";
   
   message +="\"button\":";
-  if(digitalRead(pin_Button)==HIGH)
+  if(digitalRead(pin_Button)==LOW)
          message +="true";
          else
          message +="false";
   message +=",\r\n";
   
   message +="\"led\":";
-  if(digitalRead(pin_led)==HIGH)
-         message +="false";
-         else
+ 
+  if(getLED())
          message +="true";
+         else
+         message +="false";
   message +="\r\n";
    
   message +="},\r\n";
   
+
+  if(SEL_PIN>-1){
+      message +="\"power\":{\r\n";
+      
+       message +="  \"typ\":\"hlw8012\",\r\n";
+       
+       message +="  \"currentmultiplier\":";
+       message +=String(hlw8012.getCurrentMultiplier());
+       message +=",\r\n";
+       
+       message +="  \"voltagemultiplier\":";
+       message +=String(hlw8012.getVoltageMultiplier());
+       message +=",\r\n";
+       
+       message +="  \"powermultiplier\":";
+       message +=String(hlw8012.getPowerMultiplier());
+       message +=",\r\n";
+       
+       message +="  \"activepower\":";
+       message +=String(hlw8012.getActivePower());//W
+       message +=",\r\n";
+       
+       message +="  \"voltage\":";
+       message +=String(hlw8012.getVoltage());//V
+       message +=",\r\n";
+       
+       message +="  \"current\":";
+       message +=String(hlw8012.getCurrent());//A
+       message +=",\r\n";
+       
+       message +="  \"apparentpower\":";
+       message +=String(hlw8012.getApparentPower());//VA
+       message +=",\r\n";
+       
+       message +="  \"powerfactor\":";
+       message +=String((int) (100 * hlw8012.getPowerFactor()));//%
+       message +="\r\n";
+       
+/*      Serial.print("[HLW] Active Power (W)    : "); Serial.println(hlw8012.getActivePower());
+      Serial.print("[HLW] Voltage (V)         : "); Serial.println(hlw8012.getVoltage());
+      Serial.print("[HLW] Current (A)         : "); Serial.println(hlw8012.getCurrent());
+      Serial.print("[HLW] Apparent Power (VA) : "); Serial.println(hlw8012.getApparentPower());
+      Serial.print("[HLW] Power Factor (%)    : "); Serial.println((int) (100 * hlw8012.getPowerFactor()));
+      Serial.println();
+*/
+  
+      message +="},\r\n";
+  }
+
+
  
   message +="\"macadresse\":\""+macadresse+"\",\r\n";
 
@@ -567,6 +749,7 @@ void handleAction() {//Rückgabe JSON
       /action?sonoff=LEDON    LED einschalten
       /action?sonoff=LEDOFF   LED ausschalten
       /action?getpin=0        aktuellen Status von Pin IO0
+      /action?calibrate=60    SonoffPow mit 60W Glühbirne kalibrieren
   */
   String message = "{\n";
   message += "\"Arguments\":[\n";
@@ -585,6 +768,26 @@ void handleAction() {//Rückgabe JSON
       if (server.arg(i) == "LEDON")  AktionBefehl = 3;
       if (server.arg(i) == "LEDOFF")  AktionBefehl = 4;
     }
+    
+    if (server.argName(i) == "calibrate"){
+       if(SEL_PIN>-1){
+          calibrate( server.arg(i).toFloat() );
+          
+          message +=",  \"currentmultiplier\":";
+          message +=String(hlw8012.getCurrentMultiplier());
+          message +=",\r\n";
+          
+          message +="  \"voltagemultiplier\":";
+          message +=String(hlw8012.getVoltageMultiplier());
+          message +=",\r\n";
+          
+          message +="  \"powermultiplier\":";
+          message +=String(hlw8012.getPowerMultiplier());
+          message +="\r\n";
+
+       }
+    }
+    
     
     if (server.argName(i) == "getpin"){
        message += " ,\"val\": \"";
@@ -689,8 +892,7 @@ bool handleFileRead(String path) {//Datei löschen oder übertragen
 
 
 void handleNotFound() {
-  //--check Dateien im SPIFFS--
- digitalWrite(pin_led, false);
+ //--check Dateien im SPIFFS--
  if(!handleFileRead(server.uri())){ 
     //--404 als JSON--
     String message = "{\n \"error\":\"File Not Found\", \n\n";
@@ -707,10 +909,7 @@ void handleNotFound() {
     message += "\n ]\n}";  
     server.send(404, "text/plain", message);  
   }
-  digitalWrite(pin_led,true );
 }
-
-
 
 //----------------------IO-----------------------------
 uint8_t handleAktion(uint8_t befehl, uint8_t key) {
@@ -729,11 +928,13 @@ uint8_t handleAktion(uint8_t befehl, uint8_t key) {
       re = 2;
     }
     if (befehl == 3) {//LEDON
-      digitalWrite(pin_led, false);
+      setLED(true);
+      //digitalWrite(pin_led, false);
       re = 3;
     }
     if (befehl == 4) {//LEDOFF
-      digitalWrite(pin_led,true );
+      setLED(false);
+      //digitalWrite(pin_led,true );
       re = 4;
     }
   }

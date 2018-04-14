@@ -53,11 +53,12 @@ div,form{
 
 /*
 	SONOFFS20: 	r=0DE2FB l=66FB0D
+	SONOFFPOW: 	r=ff4646 l=0DE2FB
 	horsky: 	r=ff4646 l=4EB4FF
 */
 
 .cRelay{background-color:#ff4646;}
-.cLED{background-color:#4EB4FF;}
+.cLED{background-color:#0DE2FB;}
 
 
 

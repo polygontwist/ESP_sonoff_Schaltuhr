@@ -477,6 +477,20 @@ var timerliste=function(){
 			node=cE(lokdat,"p");
 			node.innerHTML="MAC: <span style=\"text-transform: uppercase;\">"+jdat.macadresse+"</span>";
 			
+			if(jdat.power!=undefined){
+				node=cE(lokdat,"p");
+				node.innerHTML="Active Power (W):"+jdat.power.activepower;
+				node=cE(lokdat,"p");
+				node.innerHTML="Voltage (V):"+jdat.power.voltage;
+				node=cE(lokdat,"p");
+				node.innerHTML="Current (A):"+jdat.power.current;
+				node=cE(lokdat,"p");
+				node.innerHTML="Apparent Power (VA):"+jdat.power.apparentpower;
+				node=cE(lokdat,"p");
+				node.innerHTML="Power Factor (%):"+jdat.power.powerfactor;
+			}
+			
+			
 			setstat(jdat);
 			
 			iftimr=setTimeout(function(){
