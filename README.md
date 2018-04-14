@@ -8,10 +8,15 @@ Alternative Firmware für WLAN-Steckdosen (Sonoff, Horsky, Lingan SWA1) mit folg
 * update per OTA möglich (Arduino)
 * Oberfläche per Javascript und CSS gestaltbar
 
+Getestet mit: Sonoff S20, HORSKY, Sononoff POW.
+
 Schaue Dir auch das Projekt https://github.com/arendst/Sonoff-Tasmota/ evtl. passt es besser zu Deinem Setup (mit MQTT für Alexa & Co.).
 
 # Hardwaresetup
-ja nach Schaltdose sind die Pins zu seriellen Verbindung zu finden:
+Zur Verbindung mit dem Recher benutze ich ein USB-to-Seriel-Adapter. Dort ist TX, RX, GND und 3,3V gefordert, keinesfalls darf der ESP eine höhere Spannung als 3,3V bekommen!
+
+Je nach Schaltdose sind die Pins zu seriellen Verbindung zu finden:
+
 ## Sonoff S20
 ![](https://raw.githubusercontent.com/polygontwist/ESP_sonoff_Schaltuhr/master/bilder/sonoff_platine.png)
 
@@ -24,12 +29,14 @@ Das Relais hängt an Port 5, die Status LED an Port 4 und der Button an Port 13.
 Eine Besonderheit bei der HORSKY das es kein direkten Draht zum 3.3V gibt, Vcc geht über einen Spannungsregler (AMS1117) und dann zum ESP. Ich habe die 3.3V dort angeschlossen - es hatte funktioniert. Alternativ kann man sich auch ein Kabel an den ESP löten (Pin 3v3 oben links).
 Der ESP scheint ein ESP8266-9 zu sein.
 
+## Sonoff S20 POW
+Diese hat einen zusätzlichen Chip (CSE7759) zur Strom- und Spannungsmessung.
 
-Zur Verbindung mit dem Recher benutze ich ein USB-to-Seriel-Adapter. Dort ist TX, RX, GND und 3,3V gefordert, keinesfalls darf der ESP eine höhere Spannung als 3,3V bekommen!
 
 # Quellen und Inspirationen
 folgende Bibliothecken wurden verwendet:
 * JeVe_EasyOTA https://github.com/jeroenvermeulen/JeVe_EasyOTA/
+* HLW8012 library for Arduino and ESP8266 https://github.com/xoseperez/hlw8012
 * ESP8266WiFi
 * WiFiClient
 * ESP8266WebServer
