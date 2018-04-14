@@ -75,4 +75,24 @@ Wenn die Dose erfolgreich programmiert wurde, sind die Daten im Ordner www-data 
 
 Hier habe ich schon Zeitpunkte definiert, diese werden in der Datei timer.txt abgelegt.
 
+# Web-API
+folgende Befehle stehen zur Verfügung:
+* *<ip>/action?sonoff=ON* Relais einschalten
+* *<ip>/action?sonoff=OFF* Relais ausschalten
+* *<ip>/action?sonoff=LEDON* LED einschalten
+* *<ip>/action?sonoff=LEDOFF* LED ausschalten
+* *<ip>/data.json* Rückgabe ein JSON-Formatierte Systeminfo (Relaystatus, LEDstatus, Dateien,...)
+* *<ip>/timer.txt* (wenn vorhanden) die definierten Timer
+* *<ip>/favicon.ico?delete=/favicon.ico* hiermit kann eine Datei gelöscht werden
+* *<ip>/upload* Schnittstelle zum hochladen von Dateien (per upload-Formular)
+  
+## timer.txt
+jede Zeite repräsentiert einen Timereintrage z.B. on|07:05|31|ON|t1
+* der 1. Wert sagt ob der Timer aktiv ist (on=aktiv)
+* der 2. Wert gibt den Zeitpunkt der Ausführung an, in Stunden:Minute (hh:mm)
+* der 3. Wert gibt an an welchem Tag der Timer aktiv sein soll, als byte (1=Mo, 2=Di, 4=Mi, 8=Do, 16=Fr, 32=Sa, 64=So) z.B. 31=Montag bis Freitag
+* der 4. Wert beschreibt den Befehl (ON,OFF,LEDON,LEDOFF)
+* der 5. Wert ist die ID des Timers
+  
+  
 
