@@ -77,14 +77,14 @@ Hier habe ich schon Zeitpunkte definiert, diese werden in der Datei timer.txt ab
 
 # Web-API
 folgende Befehle stehen zur Verfügung:
-* *<ip>/action?sonoff=ON* Relais einschalten
-* *<ip>/action?sonoff=OFF* Relais ausschalten
-* *<ip>/action?sonoff=LEDON* LED einschalten
-* *<ip>/action?sonoff=LEDOFF* LED ausschalten
-* *<ip>/data.json* Rückgabe ein JSON-Formatierte Systeminfo (Relaystatus, LEDstatus, Dateien,...)
-* *<ip>/timer.txt* (wenn vorhanden) die definierten Timer
-* *<ip>/favicon.ico?delete=/favicon.ico* hiermit kann eine Datei gelöscht werden
-* *<ip>/upload* Schnittstelle zum hochladen von Dateien (per upload-Formular)
+* *[ip]/action?sonoff=ON* Relais einschalten
+* *[ip]/action?sonoff=OFF* Relais ausschalten
+* *[ip]/action?sonoff=LEDON* LED einschalten
+* *[ip]/action?sonoff=LEDOFF* LED ausschalten
+* *[ip]/data.json* Rückgabe ein JSON-Formatierte Systeminfo (Relaystatus, LEDstatus, Dateien,...)
+* *[ip]/timer.txt* (wenn vorhanden) die definierten Timer
+* *[ip]/favicon.ico?delete=/favicon.ico* hiermit kann eine Datei gelöscht werden
+* *[ip]/upload* Schnittstelle zum hochladen von Dateien (per upload-Formular)
   
 ## timer.txt
 jede Zeite repräsentiert einen Timereintrage z.B. on|07:05|31|ON|t1
