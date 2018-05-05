@@ -32,6 +32,9 @@ Der ESP scheint ein ESP8266-9 zu sein.
 ## Sonoff S20 POW
 Diese hat einen zusätzlichen Chip (CSE7759) zur Strom- und Spannungsmessung.
 
+## WIFI Smart Socket PS-16-M (10A)
+Pinbelegung & Handling wie Sonoff
+![](https://raw.githubusercontent.com/polygontwist/ESP_sonoff_Schaltuhr/master/bilder/wifi_smart_socket.jpg)
 
 # Quellen und Inspirationen
 folgende Bibliothecken wurden verwendet:
