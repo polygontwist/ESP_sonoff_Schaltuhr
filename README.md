@@ -59,6 +59,7 @@ folgende Projekte waren für die Entwicklung hilfreich:
 * Einstellung: Generic ESP8266 Modul, 80 MHZ, 40MHz, DOUT, 115200, 1M (64k SPIFFS)
 * Um die Stecksode im Netzwerk zu finden kann man den ARDUINO_HOSTNAME definieren
 * Es gibt verschiedene Vordefinitionen für verschiedene Steckdosen, die passende ist einzukommentieren
+* kann sich die Dose nicht ins Netzwerk einloggen, schaltet diese in den AP-Modus (AP-Name ist der in ARDUINO_HOSTNAME definiert wurde) und ist unter 192.168.4.1 erreichbar
 
 Bei upload auf die Sonoff muß der Button gedrück werden und dann Strom geschaltet werden - damit geht der ESP8266 in den Programiermodus.
 Beim Horsky ist der Port IO0 mit GND zu verbinden.
