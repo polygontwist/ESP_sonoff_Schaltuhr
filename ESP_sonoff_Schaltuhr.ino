@@ -35,7 +35,7 @@ myNTP oNtp;
 const char* progversion  = "WLan-Timer V1.8";//ota fs ntp ti getpin HLW8012
 
 //----------------------------------------------------------------------------------------------
-
+/*
 #define ARDUINO_HOSTNAME  "sonoffpow" //http://sonoffpow.wg
 #define pin_relais 12 //red+relais   true=on
 #define pin_led 15    //blue          
@@ -47,10 +47,12 @@ const char* progversion  = "WLan-Timer V1.8";//ota fs ntp ti getpin HLW8012
 #define SEL_PIN    5
 #define CF1_PIN   13
 #define CF_PIN    14
+*/
 
 
-/*
-#define ARDUINO_HOSTNAME  "sonoffs20" //http://sonoffs20.wg
+//#define ARDUINO_HOSTNAME  "sonoffs20" //http://sonoffs20.wg
+//#define ARDUINO_HOSTNAME  "dose2" //http://dose2.wg
+#define ARDUINO_HOSTNAME  "dose3" //http://dose3.wg
 #define pin_relais 12               //blue+relais   true=on
 #define pin_led 13                  //green         false=on      
 #define pin_ledinvert true          //false=on      
@@ -59,7 +61,7 @@ const char* progversion  = "WLan-Timer V1.8";//ota fs ntp ti getpin HLW8012
 #define SEL_PIN   -1                //-= kein
 #define CF1_PIN   -1
 #define CF_PIN    -1
-*/
+
 
 /*
 #define ARDUINO_HOSTNAME  "horsky"//

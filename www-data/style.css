@@ -1,6 +1,18 @@
 *{
 	box-sizing: border-box;
 }
+
+/*	LED-Farben
+	SONOFFS20: 				r=0DE2FB l=66FB0D türkis grün
+	SONOFFPOW: 				r=ff4646 l=0DE2FB rot türkis
+	WIFI Smart Socket: 		r=4EB4FF l=66FB0D blau grün
+	horsky: 				r=ff4646 l=4EB4FF rot blau
+*/
+
+.cRelay{background-color:#4EB4FF;}
+.cLED{background-color:#66FB0D;}
+
+
 body,h1{
 	font-family:Verdana;
 	font-size:12pt;
@@ -50,17 +62,6 @@ div,form{
 	height:20px;
 	position:relative;
 }
-
-/*
-	SONOFFS20: 	r=0DE2FB l=66FB0D
-	SONOFFPOW: 	r=ff4646 l=0DE2FB
-	horsky: 	r=ff4646 l=4EB4FF
-*/
-
-.cRelay{background-color:#ff4646;}
-.cLED{background-color:#0DE2FB;}
-
-
 
 .pout:after{
 	content:"";
