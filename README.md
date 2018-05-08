@@ -30,7 +30,14 @@ Eine Besonderheit bei der HORSKY das es kein direkten Draht zum 3.3V gibt, Vcc g
 Der ESP scheint ein ESP8266-9 zu sein.
 
 ## Sonoff S20 POW
-Diese hat einen zusätzlichen Chip (CSE7759) zur Strom- und Spannungsmessung.
+Diese hat einen zusätzlichen Chip (CSE7759) zur Strom- und Spannungsmessung. Die Ansteuerung ist analog zum hlw8012.
+![](https://raw.githubusercontent.com/polygontwist/ESP_sonoff_Schaltuhr/master/bilder/sonoffPOW_serial.jpg)
+* pin_relais 12 //red+relais   true=on
+* pin_led 15    //blue          
+* pin_Button 0  //Button  LOW=down 
+* SEL_PIN    5  //https://github.com/xoseperez/hlw8012
+* CF1_PIN   13
+* CF_PIN    14
 
 ## WIFI Smart Socket PS-16-M (10A)
 Pinbelegung & Handling wie Sonoff
