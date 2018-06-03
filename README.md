@@ -65,9 +65,9 @@ folgende Projekte waren für die Entwicklung hilfreich:
 
 # Installation mit Arduino IDE 1.8.5
 * zuerst müssen die Zeilen #define WIFI_SSID und #define WIFI_PASSWORD aus kommentiert und befüllt werden
-* die Zeile #include "wifisetup.h" ist auszukommentieren (ich habe dort meine Wifi-Setting abgelegt)
+* die Zeile #include "wifisetup.h" ist auszukommentieren (ich habe dort meine Wifi-Einstellungen abgelegt)
 * Einstellung: Generic ESP8266 Modul, 80 MHZ, 40MHz, DOUT, 115200, 1M (64k SPIFFS)
-* Um die Stecksode im Netzwerk zu finden kann man den ARDUINO_HOSTNAME definieren
+* Um die Stecksode im Netzwerk zu finden, sollte ARDUINO_HOSTNAME definiert werden
 * Es gibt verschiedene Vordefinitionen für verschiedene Steckdosen, die passende ist einzukommentieren
 * kann sich die Dose nicht ins Netzwerk einloggen, schaltet diese in den AP-Modus (AP-Name ist der in ARDUINO_HOSTNAME definiert wurde) und ist unter 192.168.4.1 erreichbar
 
@@ -105,5 +105,6 @@ jede Zeite repräsentiert einen Timereintrage z.B. on|07:05|31|ON|t1
 * der 4. Wert beschreibt den Befehl (ON,OFF,LEDON,LEDOFF)
 * der 5. Wert ist die ID des Timers
   
-  
+ ## TODO / was ist noch zu tun
+ * WLAN-Einstellungen dynamisch anpassbar machen (siehe esp32-32x32rgbmatrix)
 
