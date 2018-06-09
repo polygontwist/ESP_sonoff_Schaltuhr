@@ -1,6 +1,5 @@
 /*
-  Sonoff
-  b4:e6:2d:25:42:7c
+  getestet mit: Sonoff, WIFI Smart Socket, horsky
   115200 Baud
 
   ESP8266, DOUT, 115200, 1M(64k SPIFFS), 80MHz
@@ -11,6 +10,7 @@
 /*
   TODO: 
   -PowerOnState ->per Datei?
+  -wlan/ssid-Setup per AP-Mode ->siehe esp32-32x32rgb-matrix/setINI (SSL ?)
   
 */
 
@@ -32,15 +32,17 @@ myNTP oNtp;
 
 #include "data.h" //index.htm
 
-const char* progversion  = "WLan-Timer V1.8";//ota fs ntp ti getpin HLW8012
+const char* progversion  = "WLan-Timer V2.0";//ota fs ntp ti getpin HLW8012
 
 //----------------------------------------------------------------------------------------------
 /*
 #define ARDUINO_HOSTNAME  "sonoffpow" //http://sonoffpow.wg
 #define pin_relais 12 //red+relais   true=on
 #define pin_led 15    //blue          
-#define pin_ledinvert false    //      true=on      
 #define pin_Button 0  //Button        LOW=down 
+#define pin_ledinvert false    //      true=on      
+#define pin_relaisinvert false      //true=on      
+#define pin_buttoninvert true  
 #define buttMode INPUT
 //https://github.com/erniberni/ESP_pow/blob/master/ESP_pow_with_OTA.ino
 //https://github.com/xoseperez/hlw8012
@@ -51,24 +53,28 @@ const char* progversion  = "WLan-Timer V1.8";//ota fs ntp ti getpin HLW8012
 
 
 //#define ARDUINO_HOSTNAME  "sonoffs20" //http://sonoffs20.wg
-//#define ARDUINO_HOSTNAME  "dose2" //http://dose2.wg
-#define ARDUINO_HOSTNAME  "dose3" //http://dose3.wg
+#define ARDUINO_HOSTNAME  "dose2" //http://dose2.wg
+//#define ARDUINO_HOSTNAME  "dose3" //http://dose3.wg
 #define pin_relais 12               //blue+relais   true=on
 #define pin_led 13                  //green         false=on      
-#define pin_ledinvert true          //false=on      
 #define pin_Button 0                //Button        LOW=down  
+#define pin_ledinvert true          //false=on      
+#define pin_relaisinvert false      //true=on 
+#define pin_buttoninvert true  
 #define buttMode INPUT
 #define SEL_PIN   -1                //-= kein
 #define CF1_PIN   -1
 #define CF_PIN    -1
-
+/**/
 
 /*
 #define ARDUINO_HOSTNAME  "horsky"//
 #define pin_relais 5              //red+relais   true=on
 #define pin_led 4                 //blue         false=on
-#define pin_ledinvert true          //false=on      
 #define pin_Button 13             //Button     LOW=down
+#define pin_ledinvert true          //false=on      
+#define pin_relaisinvert false      //true=on      
+#define pin_buttoninvert true  
 #define buttMode INPUT_PULLUP     //!
 #define SEL_PIN   -1              //-= kein
 #define CF1_PIN   -1
@@ -78,7 +84,7 @@ const char* progversion  = "WLan-Timer V1.8";//ota fs ntp ti getpin HLW8012
 
 //#define WIFI_SSID         ""
 //#define WIFI_PASSWORD     ""
-#include "wifisetup.h"
+#include "wifisetup.h"    //fest eingebunden
 
 //----------------------------------------------------------------------------------------------
 
@@ -92,8 +98,13 @@ unsigned long tim_zeitchecker= 15*1000;//alle 15sec Timer checken
 unsigned long tim_previousMillis=0;
 byte last_minute;
 
-#define UPDATE_TIMEHLW8012 2000       //alle 2 Secunden messen
+#define UPDATE_TIMEHLW8012 2000       //alle 2 Sekunden messen
 unsigned long UPDATE_TIMEHLW8012_previousMillis=0;
+
+#define check_wlanasclient 10000      //alle 10 Sekunden gucken ob noch verbunden, wenn nicht neuer Versuch
+unsigned long check_wlanasclient_previousMillis=0;
+#define anzahlVersuche 10             //nach 10 Versuchen im AP-Modus bleiben
+
 
 #define actionheader "HTTP/1.1 303 OK\r\nLocation:/index.htm\r\nCache-Control: no-cache\r\n\r\n"
 
@@ -104,7 +115,7 @@ String macadresse="";
 
 EasyOTA OTA;
 ESP8266WebServer server(80);
-File fsUploadFile;                      //Hält den aktuellen Upload
+File fsUploadFile;                      //Haelt den aktuellen Upload
 
 
 //hlw8012 / CSE7759 setup
@@ -114,6 +125,9 @@ File fsUploadFile;                      //Hält den aktuellen Upload
 #define VOLTAGE_RESISTOR_DOWNSTREAM     ( 1000 ) // Real 1.009k
 
 HLW8012 hlw8012;
+
+bool isAPmode=false;
+int anzahlVerbindungsversuche=0;
 
 
 //---------------------------------------------
@@ -148,7 +162,81 @@ bool getLED(){
     }
 }
 
+void setRelais(bool an){
+  if(pin_relaisinvert)an=!an;
+  digitalWrite(pin_relais, an);
+}
+void toogleRelais(){
+  digitalWrite(pin_relais, !digitalRead(pin_relais));
+}
+
+bool getRelay(){
+  if(pin_relaisinvert){
+     return digitalRead(pin_relais)==LOW;
+    }
+    else{
+     return digitalRead(pin_relais)==HIGH;
+    }
+}
+bool getButton(){
+  if(pin_buttoninvert){
+     return digitalRead(pin_Button)==LOW;
+    }
+    else{
+     return digitalRead(pin_Button)==HIGH;
+    }
+}
+
+
 //---------------------------------------------
+void connectWLAN(){
+   setLED(true);
+  
+   anzahlVerbindungsversuche++;
+   OTA.setup(WIFI_SSID, WIFI_PASSWORD, ARDUINO_HOSTNAME);//connect to WLAN
+   isAPmode=!(WiFi.status() == WL_CONNECTED);
+
+
+   Serial.print("mode: ");
+   if(isAPmode)
+      Serial.println("AP");
+      else
+      Serial.println("client");
+
+  macadresse="";
+  WiFi.macAddress(MAC_array);
+  for (int i = 0; i < sizeof(MAC_array); ++i) {
+    if(i>0) macadresse+=":";
+    macadresse+= String(MAC_array[i], HEX);
+  }
+  Serial.print("MAC: ");
+  Serial.println(macadresse);
+
+  Serial.print("Connected to ");
+  Serial.println(WIFI_SSID);
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP()); 
+
+  if(isAPmode){
+      setLED(true);
+      delay(500);
+      setLED(false);
+      delay(250);
+      setLED(true);
+      delay(500);
+      setLED(false);
+      delay(250);
+      setLED(true);
+      delay(500);
+      setLED(false);
+      delay(250);
+    }
+    else{
+      anzahlVerbindungsversuche=0;//erfolgreich verbunden, Zaehler auf 0 setzen
+      setLED(false);
+   }
+}
+
 
 void setup() {
   //serial
@@ -167,7 +255,7 @@ void setup() {
   pinMode(pin_Button, buttMode); 
 
   //Power ON:
-  digitalWrite(pin_relais,false);//relay off
+  setRelais(false);//relay off
   setLED(true);  //LED on
 
   //Initialize HLW8012/ CSE7759
@@ -188,23 +276,9 @@ void setup() {
     //digitalWrite(pin_led, !digitalRead(pin_led));//Staus LED blinken
     Serial.println(message);
   });
-  OTA.setup(WIFI_SSID, WIFI_PASSWORD, ARDUINO_HOSTNAME);//connect to WLAN
 
-  //get MAC
-  WiFi.macAddress(MAC_array);
-  for (int i = 0; i < sizeof(MAC_array); ++i) {
-    if(i>0) macadresse+=":";
-    macadresse+= String(MAC_array[i], HEX);
-  }
-  Serial.print("MAC: ");
-  Serial.println(macadresse);
-
-  Serial.print("Connected to ");
-  Serial.println(WIFI_SSID);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  
+  connectWLAN();
+    
   server.on("/action", handleAction);//daten&befehle
   
   server.on("/",handleIndex);
@@ -238,15 +312,15 @@ void loop() {
   server.handleClient();
   OTA.loop();
   oNtp.update();
+  isAPmode=!(WiFi.status() == WL_CONNECTED);
   
   unsigned long currentMillis = millis();//milliseconds since the Arduino board began running
   
   //Button
   if( currentMillis - butt_previousMillis > butt_zeitchecker){//alle 120ms
      butt_previousMillis=currentMillis;
-     int buttonstate=digitalRead(pin_Button);
-     
-     if (buttonstate == HIGH) {//up
+    
+     if (!getButton()) {//up
         if( buttpresstime>0){
            setLED(false);
            //digitalWrite(pin_led, true);//LED off
@@ -271,7 +345,8 @@ void loop() {
            else
            {
             //toogle Relais
-            digitalWrite(pin_relais, !digitalRead(pin_relais));
+            
+            toogleRelais();
             Serial.println("toogle Relay");
            }
            buttpresstime=0;
@@ -314,6 +389,17 @@ void loop() {
     
  }
 
+ //WLAN-ceck
+ if(currentMillis - check_wlanasclient_previousMillis > check_wlanasclient){
+      //zeit abgelaufen
+      check_wlanasclient_previousMillis = currentMillis;
+       if(isAPmode){//apmode
+        //neuer Verbindengsaufbauversuch
+         if(anzahlVerbindungsversuche<anzahlVersuche){//nur x-mal, dann im AP-Mode bleiben
+               connectWLAN();
+         }
+      }
+ }
 
 /*//TODO ?
  if ( WiFi.status() != WL_CONNECTED ){
@@ -434,7 +520,7 @@ void checktimer(){
                     }
                    /* else{
                       //Serial.print(befehl); 
-                      //Serial.println("  Befehl ungültig  "); 
+                      //Serial.println("  Befehl ungueltig  "); 
                      }*/
                }/*else{
                   Serial.println(" but not time.");
@@ -504,7 +590,7 @@ void handleData(){// data.json
   String message = "{\r\n";
   String aktionen = "";
 
-  //übergabeparameter?
+  //uebergabeparameter?
   for (uint8_t i = 0; i < server.args(); i++) {
     if (server.argName(i) == "settimekorr") {
        oNtp.setTimeDiff(server.arg(i).toInt());
@@ -537,6 +623,14 @@ void handleData(){// data.json
   message +="\"progversion\":\""+String(progversion)+"\",\r\n";
   message +="\"cpu_freq\":\""+String(ESP.getCpuFreqMHz())+"\",\r\n";
   message +="\"chip_id\":\""+String(ESP.getChipId())+"\",\r\n";
+
+  message +="\"isAPmode\":\"";
+  if(isAPmode)
+     message +="true";
+    else
+     message +="false";
+  message +="\",\r\n";
+
   
   byte ntp_stunde   =oNtp.getstunde();
   byte ntp_minute   =oNtp.getminute();
@@ -570,14 +664,14 @@ void handleData(){// data.json
   message +="\"portstatus\":{\r\n";
   
   message +="\"relais\":";
-  if(digitalRead(pin_relais)==HIGH)
+  if(getRelay())
          message +="true";
          else
          message +="false";
   message +=",\r\n";
   
   message +="\"button\":";
-  if(digitalRead(pin_Button)==LOW)
+  if(getButton())
          message +="true";
          else
          message +="false";
@@ -679,7 +773,7 @@ void handleData(){// data.json
 }
 
 
-void handleIndex() {//Rückgabe HTML
+void handleIndex() {//Rueckgabe HTML
   //$h1gtag $info
   int pos1 = 0;
   int pos2 = 0;
@@ -695,7 +789,7 @@ void handleIndex() {//Rückgabe HTML
 
     //Tags gegen Daten ersetzen
     if (s.indexOf("$h1gtag") != -1) {
-      s.replace("$h1gtag", progversion);//Überscherscift=Prog-Version
+      s.replace("$h1gtag", progversion);//Ueberschersrift=Prog-Version
     }
 
     //Liste der Dateien
@@ -710,7 +804,7 @@ void handleIndex() {//Rückgabe HTML
             tmp+="<tr>\n";
             tmp+="\t<td><a target=\"_blank\" href =\"" + fileName + "\"" ;
             tmp+= " >" + fileName.substring(1) + "</a></td>\n\t<td class=\"size\">" + formatBytes(dir.fileSize())+"</td>\n\t<td class=\"action\">";
-            tmp+="<a href =\"" + fileName + "?delete=" + fileName + "\" class=\"fl_del\"> löschen </a>\n";
+            tmp+="<a href =\"" + fileName + "?delete=" + fileName + "\" class=\"fl_del\"> loeschen </a>\n";
             tmp+="\t</td>\n</tr>\n";
         };
 
@@ -744,14 +838,14 @@ void handleIndex() {//Rückgabe HTML
 }
 
 
-void handleAction() {//Rückgabe JSON
+void handleAction() {//Rueckgabe JSON
   /*
       /action?sonoff=ON       Relais einschalten
       /action?sonoff=OFF      Relais ausschalten
       /action?sonoff=LEDON    LED einschalten
       /action?sonoff=LEDOFF   LED ausschalten
       /action?getpin=0        aktuellen Status von Pin IO0
-      /action?calibrate=60    SonoffPow mit 60W Glühbirne kalibrieren
+      /action?calibrate=60    SonoffPow mit 60W Gluehbirne kalibrieren
   */
   String message = "{\n";
   message += "\"Arguments\":[\n";
@@ -799,6 +893,12 @@ void handleAction() {//Rückgabe JSON
               message += "false";
        message += "\"";
     }
+
+    //TODO:
+    //setSSID
+    //setPassword
+
+    
     message += "}";
   }
   message += "\n]";
@@ -819,7 +919,7 @@ void handleAction() {//Rückgabe JSON
 }
 
 
-String getContentType(String filename) {              // ContentType für den Browser
+String getContentType(String filename) {              // ContentType fuer den Browser
   if (filename.endsWith(".htm")) return "text/html";
   //else if (filename.endsWith(".html")) return "text/html";
   else if (filename.endsWith(".css")) return "text/css";
@@ -866,11 +966,11 @@ void handleFileUpload() {          // Dateien ins SPIFFS schreiben
   }
 }
 
-bool handleFileRead(String path) {//Datei löschen oder übertragen
+bool handleFileRead(String path) {//Datei loeschen oder uebertragen
   if(server.hasArg("delete")) {
     //Serial.print("delete: ");
     //Serial.print(server.arg("delete"));
-    SPIFFS.remove(server.arg("delete"));  //hier wir gelöscht
+    SPIFFS.remove(server.arg("delete"));  //hier wir geloescht
        /*Serial.println(" OK");
         else
         Serial.println(" ERR");*/
@@ -922,11 +1022,11 @@ uint8_t handleAktion(uint8_t befehl, uint8_t key) {
   Serial.println(key);*/
   if (key == 1) {
     if (befehl == 1) {//ON
-      digitalWrite(pin_relais, true);
+      setRelais(true);
       re = 1;
     }
     if (befehl == 2) {//OFF
-      digitalWrite(pin_relais, false);
+      setRelais(false);
       re = 2;
     }
     if (befehl == 3) {//LEDON
