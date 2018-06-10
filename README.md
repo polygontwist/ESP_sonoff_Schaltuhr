@@ -1,4 +1,4 @@
-# Projekt: Wifi Schaltuhr Version 2.0
+# Projekt: Wifi Schaltuhr Version 2.1
 
 Alternative Firmware für WLAN-Steckdosen (Sonoff, Horsky, Lingan SWA1) mit folgenden Funktionen:
 * Schalten per WLAN-Verbindung
@@ -105,9 +105,10 @@ jede Zeite repräsentiert einen Timereintrage z.B. on|07:05|31|ON|t1
 * der 4. Wert beschreibt den Befehl (ON,OFF,LEDON,LEDOFF)
 * der 5. Wert ist die ID des Timers
   
-## WLAN connect
-Ab Version 2.0: wenn der erste Versuch nicht geklappt hat, versucht die Dose es noch 10 mal (alle 10 Sekunden). Gelingt keine Verbindung bleibt sie im AP-Modus. 
+## History
+* Ab Version 2.0: wenn der erste Versuch nicht geklappt hat, versucht die Dose es noch 10 mal (alle 10 Sekunden). Gelingt keine Verbindung bleibt sie im AP-Modus. 
 Fällt zwischendurch das WLAN aus, versucht die Dose einen reconnect (10mal, alle 10 Sek.), gelinkt keine Verbindung bleibt sie im AP-Modus.
+* Version 2.1: HTML Umlaute codiert
   
  ## TODO / was ist noch zu tun
  * WLAN-Einstellungen dynamisch anpassbar machen (siehe esp32-32x32rgbmatrix)
