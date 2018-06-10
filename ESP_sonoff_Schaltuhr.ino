@@ -32,7 +32,7 @@ myNTP oNtp;
 
 #include "data.h" //index.htm
 
-const char* progversion  = "WLan-Timer V2.0";//ota fs ntp ti getpin HLW8012
+const char* progversion  = "WLan-Timer V2.1";//ota fs ntp ti getpin HLW8012
 
 //----------------------------------------------------------------------------------------------
 /*
@@ -789,7 +789,7 @@ void handleIndex() {//Rueckgabe HTML
 
     //Tags gegen Daten ersetzen
     if (s.indexOf("$h1gtag") != -1) {
-      s.replace("$h1gtag", progversion);//Ueberschersrift=Prog-Version
+      s.replace("$h1gtag", progversion);//Ueberscherschrift=Prog-Version
     }
 
     //Liste der Dateien
@@ -804,7 +804,7 @@ void handleIndex() {//Rueckgabe HTML
             tmp+="<tr>\n";
             tmp+="\t<td><a target=\"_blank\" href =\"" + fileName + "\"" ;
             tmp+= " >" + fileName.substring(1) + "</a></td>\n\t<td class=\"size\">" + formatBytes(dir.fileSize())+"</td>\n\t<td class=\"action\">";
-            tmp+="<a href =\"" + fileName + "?delete=" + fileName + "\" class=\"fl_del\"> loeschen </a>\n";
+            tmp+="<a href =\"" + fileName + "?delete=" + fileName + "\" class=\"fl_del\"> l&ouml;schen </a>\n";
             tmp+="\t</td>\n</tr>\n";
         };
 

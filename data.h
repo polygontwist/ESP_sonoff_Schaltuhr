@@ -4,6 +4,7 @@
 //HTML \r\n \t
 const String indexHTM="<!DOCTYPE html><html><head>\r\n"
 "<meta charset=\"utf-8\"/>\r\n"
+"<meta content=\"width=device-width,initial-scale=0.65,maximum-scale=2,user-scalable=yes\" name=\"viewport\" />\r\n"
 "<link rel=\"shortcut icon\" href=\"favicon.ico\">\r\n"
 "<link rel=\"STYLESHEET\" type=\"text/css\" href=\"style.css\">\r\n"
 "<script type=\"text/javascript\" src=\"system.js\"></script>\r\n"
