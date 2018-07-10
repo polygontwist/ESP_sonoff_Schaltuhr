@@ -32,7 +32,7 @@ myNTP oNtp;
 
 #include "data.h" //index.htm
 
-const char* progversion  = "WLan-Timer V2.2";//ota fs ntp ti getpin HLW8012
+const char* progversion  = "WLan-Timer V2.3";//ota fs ntp ti getpin HLW8012
 
 //----------------------------------------------------------------------------------------------
 /*
@@ -101,7 +101,8 @@ byte last_minute;
 #define UPDATE_TIMEHLW8012 2000       //alle 2 Sekunden messen
 unsigned long UPDATE_TIMEHLW8012_previousMillis=0;
 
-#define check_wlanasclient 10000      //alle 10 Sekunden gucken ob noch verbunden, wenn nicht neuer Versuch
+#define check_wlanasclient 15000      //alle 15 Sekunden* gucken ob noch verbunden, wenn nicht neuer Versuch
+                                      //zwischen 15 und 30 Sekunden
 unsigned long check_wlanasclient_previousMillis=0;
 #define anzahlVersuche 10             //nach 10 Versuchen im AP-Modus bleiben
 #define keinAPModus true              //true=immer wieder versuchen ins WLAN zu kommen
@@ -390,7 +391,8 @@ void loop() {
  }
 
  //WLAN-ceck
- if(currentMillis - check_wlanasclient_previousMillis > check_wlanasclient){
+ unsigned long cwl=random(check_wlanasclient, check_wlanasclient+check_wlanasclient);//x..x+15sec sonst zu viele Anfragen am AP
+ if(currentMillis - check_wlanasclient_previousMillis > cwl){
       //zeit abgelaufen
       check_wlanasclient_previousMillis = currentMillis;
        if(isAPmode){//apmode
