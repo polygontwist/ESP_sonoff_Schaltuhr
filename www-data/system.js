@@ -458,6 +458,15 @@ var timerliste=function(){
 		var node;
 		if(lokdat!=undefined){
 			if(iftimr!=undefined)clearTimeout(iftimr);
+			
+			if(jdat.error!=undefined){
+				console.log("Fehler",typeof jdat,jdat);
+				iftimr=setTimeout(function(){
+					getpostData(dateisysinfo,retlokaldata);
+				},1000*20);//20sec
+				return;
+			}
+			
 			lokdat.innerHTML="";			
 			node=cE(lokdat,"p");
 			var t=jdat.lokalzeit.split(":");
