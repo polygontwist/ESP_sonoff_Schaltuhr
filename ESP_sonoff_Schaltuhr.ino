@@ -101,8 +101,8 @@ byte last_minute;
 #define UPDATE_TIMEHLW8012 2000       //alle 2 Sekunden messen
 unsigned long UPDATE_TIMEHLW8012_previousMillis=0;
 
-#define check_wlanasclient 15000      //alle 15 Sekunden* gucken ob noch verbunden, wenn nicht neuer Versuch
-                                      //zwischen 15 und 30 Sekunden
+#define check_wlanasclient 30000      //alle 30 Sekunden*2 gucken ob noch verbunden, wenn nicht neuer Versuch
+                                      //zwischen 30 und 60 Sekunden
 unsigned long check_wlanasclient_previousMillis=0;
 #define anzahlVersuche 10             //nach 10 Versuchen im AP-Modus bleiben
 #define keinAPModus true              //true=immer wieder versuchen ins WLAN zu kommen
