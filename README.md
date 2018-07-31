@@ -45,7 +45,7 @@ Pinbelegung & Handling wie Sonoff
 
 # Quellen und Inspirationen
 folgende Bibliothecken wurden verwendet:
-* JeVe_EasyOTA https://github.com/jeroenvermeulen/JeVe_EasyOTA/
+* JeVe_EasyOTA (Version 2.2.0) https://github.com/jeroenvermeulen/JeVe_EasyOTA/
 * HLW8012 library for Arduino and ESP8266 https://github.com/xoseperez/hlw8012
 * ESP8266WiFi
 * WiFiClient
