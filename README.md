@@ -115,3 +115,12 @@ Fällt zwischendurch das WLAN aus, versucht die Dose einen reconnect (10mal, all
  ## TODO / was ist noch zu tun
  * WLAN-Einstellungen dynamisch anpassbar machen (siehe esp32-32x32rgbmatrix)
 
+
+## Beispiel Lampe
+Wer die Daten aus dem Ordner "beispiel_lampe" hochläd, erhält folgende Features:
+* Einstellungen in Tabs gruppiert
+* LED schalten ausgeblendet
+
+![](https://github.com/polygontwist/ESP_sonoff_Schaltuhr/blob/master/bilder/screenshots_lampe.png)
+ 
+ 

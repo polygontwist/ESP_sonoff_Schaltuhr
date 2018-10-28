@@ -52,9 +52,9 @@ const char* progversion  = "WLan-Timer V2.3";//ota fs ntp ti getpin HLW8012
 */
 
 
-//#define ARDUINO_HOSTNAME  "sonoffs20" //http://sonoffs20.wg
-#define ARDUINO_HOSTNAME  "dose2" //http://dose2.wg
-//#define ARDUINO_HOSTNAME  "dose3" //http://dose3.wg
+//#define ARDUINO_HOSTNAME  "sonoffs20" //http://sonoffs20.wg ->anlage
+//#define ARDUINO_HOSTNAME  "dose2" //http://dose2.wg ->usb-Strom
+#define ARDUINO_HOSTNAME  "lampe" //http://lampe.wg (dose3)
 #define pin_relais 12               //blue+relais   true=on
 #define pin_led 13                  //green         false=on      
 #define pin_Button 0                //Button        LOW=down  
