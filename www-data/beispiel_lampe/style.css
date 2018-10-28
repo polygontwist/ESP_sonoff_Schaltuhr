@@ -6,7 +6,7 @@
 	WIFI Smart Socket: 		r=4EB4FF l=66FB0D blau grün
 */
 
-.cRelay{background-color:#4EB4FF;}
+.cRelay{background-color:#F9FF0A;}
 .cLED{background-color:#66FB0D;}
 
 
@@ -325,9 +325,7 @@ h1{display:none;}
 #b_ON,#b_OFF{
 	width:120px;
 }
-.cRelay{
-	background-color: #F9FF0A;
-}
+
 .pout{
 	width: 30px;
 	height: 30px;	
