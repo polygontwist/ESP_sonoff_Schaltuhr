@@ -105,22 +105,23 @@ jede Zeite repräsentiert einen Timereintrage z.B. on|07:05|31|ON|t1
 * der 4. Wert beschreibt den Befehl (ON,OFF,LEDON,LEDOFF)
 * der 5. Wert ist die ID des Timers
   
-## History
+# History
 * Ab Version 2.0: wenn der erste Versuch nicht geklappt hat, versucht die Dose es noch 15 mal (alle 15 Sekunden). Gelingt keine Verbindung bleibt sie im AP-Modus. 
 Fällt zwischendurch das WLAN aus, versucht die Dose einen reconnect (10mal, alle 15 Sek.), gelinkt keine Verbindung bleibt sie im AP-Modus.
 * Version 2.1: HTML Umlaute codiert
 * Version 2.2: mit "#define keinAPModus true" versucht die Dose endlos eine Neuverbindung, wenn WLan-Verbundung unterbrochen wurde.
 * Version 2.3: größere (check_wlanasclient) und variablere WLAN-check, um bei Wiederverbindung AP nicht zu überlasten
   
- ## TODO / was ist noch zu tun
+# TODO / was ist noch zu tun
  * WLAN-Einstellungen dynamisch anpassbar machen (siehe esp32-32x32rgbmatrix)
 
 
-## Beispiel Lampe
+# Beispiel Lampe
 Wer die Daten aus dem Ordner "beispiel_lampe" hochläd, erhält folgende Features:
 * Einstellungen in Tabs gruppiert
 * LED schalten ausgeblendet
 
 ![](https://github.com/polygontwist/ESP_sonoff_Schaltuhr/blob/master/bilder/screenshots_lampe.png)
+So kann mam bequem mit zwei Tasten die Lampe ein und ausschalten ohne das andere Geraffel immer zu sehen.
  
  
