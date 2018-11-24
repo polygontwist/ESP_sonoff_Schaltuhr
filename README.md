@@ -43,6 +43,17 @@ Diese hat einen zusätzlichen Chip (CSE7759) zur Strom- und Spannungsmessung. Di
 Pinbelegung & Handling wie Sonoff
 ![](https://raw.githubusercontent.com/polygontwist/ESP_sonoff_Schaltuhr/master/bilder/wifi_smart_socket.jpg)
 
+
+## Luminea (10A)
+* pin_relais 15 //relais
+* pin_led 2     //breen          
+* pin_Button 13  //Button  LOW=down 
+* pin_ledinvert true          //false=on      
+* pin_relaisinvert false      //true=on      
+* pin_buttoninvert true  
+![](https://raw.githubusercontent.com/polygontwist/ESP_sonoff_Schaltuhr/master/bilder/platine_luminea_bottom.jpg)
+
+
 # Quellen und Inspirationen
 folgende Bibliothecken wurden verwendet:
 * JeVe_EasyOTA (Version 2.2.0) https://github.com/jeroenvermeulen/JeVe_EasyOTA/

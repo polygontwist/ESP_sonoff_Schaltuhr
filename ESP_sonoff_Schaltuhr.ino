@@ -32,7 +32,7 @@ myNTP oNtp;
 
 #include "data.h" //index.htm
 
-const char* progversion  = "WLan-Timer V2.3";//ota fs ntp ti getpin HLW8012
+const char* progversion  = "WLan-Timer V2.4";//ota fs ntp ti getpin HLW8012
 
 //----------------------------------------------------------------------------------------------
 /*
@@ -54,7 +54,7 @@ const char* progversion  = "WLan-Timer V2.3";//ota fs ntp ti getpin HLW8012
 
 //#define ARDUINO_HOSTNAME  "sonoffs20" //http://sonoffs20.wg ->anlage
 //#define ARDUINO_HOSTNAME  "dose2" //http://dose2.wg ->usb-Strom
-#define ARDUINO_HOSTNAME  "lampe" //http://lampe.wg (dose3)
+/*#define ARDUINO_HOSTNAME  "lampe" //http://lampe.wg (dose3)
 #define pin_relais 12               //blue+relais   true=on
 #define pin_led 13                  //green         false=on      
 #define pin_Button 0                //Button        LOW=down  
@@ -65,7 +65,7 @@ const char* progversion  = "WLan-Timer V2.3";//ota fs ntp ti getpin HLW8012
 #define SEL_PIN   -1                //-= kein
 #define CF1_PIN   -1
 #define CF_PIN    -1
-/**/
+*/
 
 /*
 #define ARDUINO_HOSTNAME  "horsky"//
@@ -80,6 +80,19 @@ const char* progversion  = "WLan-Timer V2.3";//ota fs ntp ti getpin HLW8012
 #define CF1_PIN   -1
 #define CF_PIN    -1
 */
+
+#define ARDUINO_HOSTNAME  "luminea"//
+#define pin_relais 15             //relais  
+#define pin_led 2                 //green
+#define pin_Button 13             //Button
+#define pin_ledinvert true          //false=on      
+#define pin_relaisinvert false      //true=on      
+#define pin_buttoninvert true  
+#define buttMode INPUT     //INPUT_PULLUP
+#define SEL_PIN   -1              //-= kein
+#define CF1_PIN   -1
+#define CF_PIN    -1
+
 //----------------------------------------------------------------------------------------------
 
 //#define WIFI_SSID         ""
@@ -770,7 +783,8 @@ void handleData(){// data.json
  
   message +="\r\n}";
   
-  server.send(200, "text/html", message );
+  server.sendHeader("Access-Control-Allow-Origin", "*");//wenn vom HTTPS-Seiten aufgerufen wird!
+  server.send(200, "text/plain", message );
   Serial.println("send data.json");
 }
 
