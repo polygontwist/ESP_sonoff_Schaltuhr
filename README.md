@@ -46,10 +46,10 @@ Pinbelegung & Handling wie Sonoff
 
 ## Luminea (10A)
 * pin_relais 15 //relais
-* pin_led 2     //breen          
-* pin_Button 13  //Button  LOW=down 
-* pin_ledinvert true          //false=on      
-* pin_relaisinvert false      //true=on      
+* pin_led 2     //green          
+* pin_Button 13  //Button
+* pin_ledinvert true              
+* pin_relaisinvert false           
 * pin_buttoninvert true  
 ![](https://raw.githubusercontent.com/polygontwist/ESP_sonoff_Schaltuhr/master/bilder/platine_luminea_bottom.jpg)
 
