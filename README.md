@@ -1,4 +1,4 @@
-# Projekt: Wifi Schaltuhr Version 2.3
+# Projekt: Wifi Schaltuhr Version 2.4
 
 Alternative Firmware für WLAN-Steckdosen (Sonoff, Horsky, Lingan SWA1) mit folgenden Funktionen:
 * Schalten per WLAN-Verbindung
@@ -122,6 +122,7 @@ Fällt zwischendurch das WLAN aus, versucht die Dose einen reconnect (10mal, all
 * Version 2.1: HTML Umlaute codiert
 * Version 2.2: mit "#define keinAPModus true" versucht die Dose endlos eine Neuverbindung, wenn WLan-Verbundung unterbrochen wurde.
 * Version 2.3: größere (check_wlanasclient) und variablere WLAN-check, um bei Wiederverbindung AP nicht zu überlasten
+* Version 2.4: neue Dosentyp hinzugefügt (Luminea Home Control Wlansteckdose), Access-Control-Allow-Origin eingefügt
   
 # TODO / was ist noch zu tun
  * WLAN-Einstellungen dynamisch anpassbar machen (siehe esp32-32x32rgbmatrix)
