@@ -51,6 +51,10 @@ Pinbelegung & Handling wie Sonoff
 * pin_ledinvert true              
 * pin_relaisinvert false           
 * pin_buttoninvert true  
+
+Ich habe meine Dose im Sonderangebot von PEARL bezogen (~5,-€). Im inneren werkelt ein ESP8266-S3, der Standesgemäß auf der Seriellen mit 74880 Baud Infos ausgibt. Z.B. die MAC-Adressen. Für den Anschluss eines USB-Seriell-Wandlers sind auf der Platine Lötpunkte an den relevanten Stellen vorhanden.
+Bei dieser Dose liegen auf Pin 15 das Relais, Pin 2 die grüne LED und Pin 13 der Taster (Nummerierung nach Arduino).
+
 ![](https://raw.githubusercontent.com/polygontwist/ESP_sonoff_Schaltuhr/master/bilder/platine_luminea_bottom.jpg)
 
 
