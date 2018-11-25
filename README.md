@@ -44,7 +44,7 @@ Pinbelegung & Handling wie Sonoff
 ![](https://raw.githubusercontent.com/polygontwist/ESP_sonoff_Schaltuhr/master/bilder/wifi_smart_socket.jpg)
 
 
-## Luminea (10A)
+## Luminea Home Control Steckdose (16(2)A) von Pearl
 * pin_relais 15 //relais
 * pin_led 2     //green          
 * pin_Button 13  //Button
