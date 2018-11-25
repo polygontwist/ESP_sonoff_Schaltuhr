@@ -34,6 +34,17 @@ myNTP oNtp;
 
 const char* progversion  = "WLan-Timer V2.4";//ota fs ntp ti getpin HLW8012
 
+//-----------------------------default------------------------------------------------------
+#define ARDUINO_HOSTNAME  "Schalter"
+#define buttMode INPUT     
+#define pin_ledinvert true   //false=on      
+#define pin_buttoninvert true  
+#define pin_relaisinvert false      //true=on   
+   
+//für HLW8012 current sensor Sonoff POW
+#define SEL_PIN   -1     //-= kein
+#define CF1_PIN   -1
+#define CF_PIN    -1
 //----------------------------------------------------------------------------------------------
 /*
 #define ARDUINO_HOSTNAME  "sonoffpow" //http://sonoffpow.wg
@@ -41,9 +52,6 @@ const char* progversion  = "WLan-Timer V2.4";//ota fs ntp ti getpin HLW8012
 #define pin_led 15    //blue          
 #define pin_Button 0  //Button        LOW=down 
 #define pin_ledinvert false    //      true=on      
-#define pin_relaisinvert false      //true=on      
-#define pin_buttoninvert true  
-#define buttMode INPUT
 //https://github.com/erniberni/ESP_pow/blob/master/ESP_pow_with_OTA.ino
 //https://github.com/xoseperez/hlw8012
 #define SEL_PIN    5
@@ -58,13 +66,6 @@ const char* progversion  = "WLan-Timer V2.4";//ota fs ntp ti getpin HLW8012
 #define pin_relais 12               //blue+relais   true=on
 #define pin_led 13                  //green         false=on      
 #define pin_Button 0                //Button        LOW=down  
-#define pin_ledinvert true          //false=on      
-#define pin_relaisinvert false      //true=on 
-#define pin_buttoninvert true  
-#define buttMode INPUT
-#define SEL_PIN   -1                //-= kein
-#define CF1_PIN   -1
-#define CF_PIN    -1
 */
 
 /*
@@ -72,26 +73,14 @@ const char* progversion  = "WLan-Timer V2.4";//ota fs ntp ti getpin HLW8012
 #define pin_relais 5              //red+relais   true=on
 #define pin_led 4                 //blue         false=on
 #define pin_Button 13             //Button     LOW=down
-#define pin_ledinvert true          //false=on      
-#define pin_relaisinvert false      //true=on      
-#define pin_buttoninvert true  
 #define buttMode INPUT_PULLUP     //!
-#define SEL_PIN   -1              //-= kein
-#define CF1_PIN   -1
-#define CF_PIN    -1
 */
 
 #define ARDUINO_HOSTNAME  "luminea"//
 #define pin_relais 15             //relais  
 #define pin_led 2                 //green
 #define pin_Button 13             //Button
-#define pin_ledinvert true          //false=on      
-#define pin_relaisinvert false      //true=on      
-#define pin_buttoninvert true  
-#define buttMode INPUT     //INPUT_PULLUP
-#define SEL_PIN   -1              //-= kein
-#define CF1_PIN   -1
-#define CF_PIN    -1
+
 
 //----------------------------------------------------------------------------------------------
 
