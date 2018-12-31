@@ -9,11 +9,12 @@
 	horsky: 				r=ff4646 l=4EB4FF rot blau
 */
 
-.cRelay{background-color:#4EB4FF;}
-.cLED{background-color:#66FB0D;}
+.cRelay,.crelais{background-color:#4EB4FF;}
+.cLED,.cled{background-color:#66FB0D;}
+.cled2{background-color:#4EB4FF;}
+.cledWLAN{background-color:#4EB4FF;}
 
-
-body,h1{
+body,h1,h2{
 	font-family:Verdana;
 	font-size:12pt;
 	margin: 0;
@@ -25,9 +26,25 @@ h1{
 	padding: 2px;
 	text-align: center;
 }
+h2{
+	font-weight:normal;
+	display: inline-block;
+}
 div,form{
 	padding: 0 10px;
 	margin-bottom:10px;
+}
+
+#actions p{
+	margin:0;
+	margin-bottom: 0 5px;
+}
+.error{
+	opacity:0.25;
+	cursor: not-allowed;
+}
+.error a{
+	cursor: not-allowed;
 }
 
 .butt {
@@ -43,6 +60,8 @@ div,form{
 	text-align:center;
 	background-color: #1FA3EC;
 }
+.txtan:after{content:"an"}
+.txtaus:after{content:"aus"}
 
 .butt:hover{
 	border-color:#0a5b87;
@@ -61,6 +80,7 @@ div,form{
 	width:20px;
 	height:20px;
 	position:relative;
+	top: 7px;
 }
 
 .pout:after{

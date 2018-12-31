@@ -1,8 +1,31 @@
-// V30.03.2018
-// Sonoff
+// V30.12.2018 version2
 
-var befehllist=[{b:'ON',n:"On"},{b:'OFF',n:"Off"},{b:'LEDON',n:"LED On"},{b:'LEDOFF',n:"LED Off"}];
+//
+var befehllist=[{b:'ON',n:"On"},{b:'OFF',n:"Off"}];//,{b:'LEDON',n:"LED On"},{b:'LEDOFF',n:"LED Off"}
 
+var typen={
+	'relais':	{a:false,n:'Schalter',b:['ON','OFF']},
+	'led':		{a:false,n:'LED',b:['LEDON','LEDOFF']},
+	'led2':		{a:false,n:'LED 2',b:['LED2ON','LED2OFF']},
+	'ledWLAN':	{a:false,n:'LED Wlan',b:['LEDWLANON','LEDWLANOFF']}
+};
+
+var IOGroup,theTimerList;
+
+var onError=function(){
+	if(IOGroup)IOGroup.error();
+	if(theTimerList)theTimerList.error();
+	addClass(gE("timersetting"),"error");
+	addClass(gE("sysinfo"),"error");
+	addClass(gE("filelist"),"error");
+	addClass(gE("actions"),"error");
+}
+var onOK=function(){
+	subClass(gE("timersetting"),"error");
+	subClass(gE("sysinfo"),"error");
+	subClass(gE("filelist"),"error");	
+	subClass(gE("actions"),"error");
+}
 
 var getpostData =function(url, auswertfunc,POSTdata,noheader,rh){
 		var loader,i;
@@ -19,10 +42,13 @@ var getpostData =function(url, auswertfunc,POSTdata,noheader,rh){
 		if(POSTdata!=undefined)jdata=POSTdata;//encodeURI
 		
 		loader.onreadystatechange=function(){
-			if(loader.readyState==4)auswertfunc(loader);
+			if(loader.readyState==4){
+				auswertfunc(loader);
+				onOK();
+				}
 			};
 		loader.ontimeout=function(e){console.log("TIMEOUT");}
-		loader.onerror=function(e){console.log("ERR",e,loader.readyState);}
+		loader.onerror=function(e){console.log("ERR",e,loader.readyState);onError();}
 		
 		if(jdata!=undefined){
 				loader.open("POST",url,true);
@@ -100,62 +126,89 @@ var filterJSON=function(s){
 	return re;
 }
 var cButt=function(z,txt,cl,data,click){
-	var a=cE(z,"a","b_"+data);
+	var a=cE(z,"a");
 	a.className=cl;
 	a.innerHTML=txt;
 	a.href="#";
 	a.data=data;
 	a.addEventListener('click', click);
+	return a;
 };
 	
-var setstat=function(data){
-	var n,i,rel=false,led=false,setrel=false,setled=false;
-	if(data.portstatus!=undefined){
-		rel=data.portstatus.relais;
-		led=data.portstatus.led;
-		setrel=true;setled=true;		
-	}
-	if(data.befehl!=undefined){
-		if(data.befehl=="OK"){
-			for(i=0;i<data.Arguments.length;i++){
-				if(data.Arguments[i].sonoff==="ON")		{rel=true;setrel=true;}
-				if(data.Arguments[i].sonoff==="OFF")	{setrel=true;}
-				if(data.Arguments[i].sonoff==="LEDON")	{led=true;setled=true;}
-				if(data.Arguments[i].sonoff==="LEDOFF")	{setled=true;}
-			}
-		}
-	}
-	n=gE("stat_Rls");
-	if(setrel)if(rel===true)subClass(n,"inaktiv");else addClass(n,"inaktiv");
-	n=gE("stat_LED");
-	if(setled)if(led===true)subClass(n,"inaktiv");else addClass(n,"inaktiv");
-}
 
-var SOnOff=function(){//lokal ESP_Node_Rolloswitch
-	var ESP8266URL="./action?sonoff=";	
-	var ini=function(){
-		var i,z,b;
-		z=gE("actions");
-		if(z){
-			b=cE(z,"span","stat_Rls","pout cRelay inaktiv");b.title="Relay";
-			b=cE(z,"span","stat_LED","pout cLED inaktiv");b.title="LED";
-			b=cE(z,"br");
-			for(i=0;i<befehllist.length;i++){
-				b=befehllist[i];
-				cButt(z,b.n,"butt",b.b,buttclick);
+var oIOGroup=function(){
+	var ESP8266URL="./action?sonoff=",
+		isinit=false;
+	
+	this.refresh=function(data){refresh(data);}
+	this.error=function(){}
+	
+	var refresh=function(data){
+		if(!isinit){
+			create(data);
+		}
+		
+		for(param in data.portstatus){ 
+			o=typen[param];
+			if(o && o.a){
+				if(data.portstatus[param]){
+					subClass(o.ostat,"inaktiv");
+					subClass(o.obutt,"txtan");
+					addClass(o.obutt,"txtaus");
+					}
+				else{
+					addClass(o.ostat,"inaktiv");
+					addClass(o.obutt,"txtan");
+					subClass(o.obutt,"txtaus");
+					}
 			}
 		}
 	}
+	
+	var create=function(data){
+		var param,z,o,i,p,h2;
+		z=gE("actions");
+		if(z && data.portstatus!=undefined){
+			for(param in data.portstatus){ 
+				if(typen[param])typen[param].a=true;//aktivieren	
+			}
+			//Interaktionen
+			for(param in typen){
+				o=typen[param];
+				if(o.a){
+					p=cE(z,"p");
+					
+					o.ostat=cE(p,"span",undefined,"pout c"+param+" inaktiv");					
+					o.obutt =cButt(p,'',"butt",o.b,buttclick);
+					
+					h2=cE(p,"h2");
+					h2.innerHTML=o.n;
+				}
+			}
+					
+			isinit=true;
+		}
+	}
+		
 	var buttclick=function(e){
-		getpostData(ESP8266URL+this.data,fresult);//Daten laden/senden
+		if(istClass(this,"txtan")){
+			subClass(this,"txtan");
+			addClass(this,"txtaus");
+			getpostData(ESP8266URL+this.data[0],fresult);
+		}
+		else{
+			addClass(this,"txtan");
+			subClass(this,"txtaus");
+			getpostData(ESP8266URL+this.data[1],fresult);
+		}
 		e.preventDefault();
 	}	
 	var fresult=function(data){
 		var j=filterJSON(data.responseText);
 		console.log(j);//befehl:"ok"
-		setstat(j);
-	}	
-	ini();
+		//get status
+		getpostData("./data.json",function(d){refresh(filterJSON(d.responseText))});
+	}
 }
 
 
@@ -169,6 +222,8 @@ var timerliste=function(){
 	var lokdat=undefined;
 	
 	var wochentag=["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+	
+	this.error=function(){}
 	
 	var uploadtimerdaten=function(s){
 		var id= (new Date()).getTime();
@@ -499,8 +554,7 @@ var timerliste=function(){
 				node.innerHTML="Power Factor (%):"+jdat.power.powerfactor;
 			}
 			
-			
-			setstat(jdat);
+			if(IOGroup)IOGroup.refresh(jdat);
 			
 			iftimr=setTimeout(function(){
 				getpostData(dateisysinfo,retlokaldata);
@@ -523,6 +577,6 @@ var timerliste=function(){
 
 
 window.addEventListener('load', function (event) {
-	var r=new SOnOff();
-	var tl=new timerliste();
+	IOGroup=new oIOGroup();
+	theTimerList=new timerliste();
 });

@@ -32,7 +32,7 @@ myNTP oNtp;
 
 #include "data.h" //index.htm
 
-const char* progversion  = "WLan-Timer V2.4";//ota fs ntp ti getpin HLW8012
+const char* progversion  = "WLan-Timer V2.5";//ota fs ntp ti getpin HLW8012
 
 //-----------------------------default------------------------------------------------------
 #define ARDUINO_HOSTNAME  "Schalter"
@@ -40,6 +40,12 @@ const char* progversion  = "WLan-Timer V2.4";//ota fs ntp ti getpin HLW8012
 #define pin_ledinvert true   //false=on      
 #define pin_buttoninvert true  
 #define pin_relaisinvert false      //true=on   
+
+#define pin_led2 -1
+#define pin_led2invert true   //false=on      
+#define pin_ledWLAN -1
+#define pin_ledWLANinvert true   //false=on      
+
    
 //für HLW8012 current sensor Sonoff POW
 #define SEL_PIN   -1     //-= kein
@@ -60,26 +66,48 @@ const char* progversion  = "WLan-Timer V2.4";//ota fs ntp ti getpin HLW8012
 */
 
 
-//#define ARDUINO_HOSTNAME  "sonoffs20" //http://sonoffs20.wg ->anlage
-//#define ARDUINO_HOSTNAME  "dose2" //http://dose2.wg ->usb-Strom
-/*#define ARDUINO_HOSTNAME  "lampe" //http://lampe.wg (dose3)
+#define ARDUINO_HOSTNAME  "sonoffs20" //V2.5  http://sonoffs20.wg ->anlage
+//#define ARDUINO_HOSTNAME  "dose2" //V2.5 http://dose2.wg 32x32
+//#define ARDUINO_HOSTNAME  "lampe" //V2.5  http://lampe.wg (dose3)
 #define pin_relais 12               //blue+relais   true=on
 #define pin_led 13                  //green         false=on      
 #define pin_Button 0                //Button        LOW=down  
-*/
+/**/
 
 /*
-#define ARDUINO_HOSTNAME  "horsky"//
+#define ARDUINO_HOSTNAME  "horsky"// V2.5 ->usb-Strom
 #define pin_relais 5              //red+relais   true=on
 #define pin_led 4                 //blue         false=on
 #define pin_Button 13             //Button     LOW=down
 #define buttMode INPUT_PULLUP     //!
 */
-
-#define ARDUINO_HOSTNAME  "luminea"//
+/*
+#define ARDUINO_HOSTNAME  "luminea"//pearl  V2.5
 #define pin_relais 15             //relais  
 #define pin_led 2                 //green
 #define pin_Button 13             //Button
+*/
+
+/*
+#define ARDUINO_HOSTNAME  "oxaoxe"// V2.5
+#define pin_relais 12             //relais  
+#define pin_led 0                 //green
+#define pin_Button 13             //Button
+#define pin_led2 15
+#define pin_led2invert true   //false=on      
+#define pin_ledWLAN 4
+#define pin_ledWLANinvert true   //false=on      
+*/
+
+//WLAN LED: io4
+//LED rot: io0
+//SW: io13
+//???:io14
+//???:io2
+//???:io5
+//Rlay: io12
+//LED blau:io15
+
 
 
 //----------------------------------------------------------------------------------------------
@@ -155,7 +183,6 @@ void setLED(bool an){
 void toogleLED(){
   digitalWrite(pin_led, !digitalRead(pin_led));
 }
-
 bool getLED(){
   if(pin_ledinvert){
      return digitalRead(pin_led)==LOW;
@@ -165,12 +192,55 @@ bool getLED(){
     }
 }
 
+void setLED2(bool an){
+  if(pin_led2>-1){
+    if(pin_led2invert)an=!an;
+    digitalWrite(pin_led2, an);
+  }
+}
+void toogleLED2(){
+  if(pin_led2>-1)
+      digitalWrite(pin_led2, !digitalRead(pin_led2));
+}
+bool getLED2(){
+  if(pin_led2invert){
+     return digitalRead(pin_led2)==LOW;
+    }
+    else{
+     return digitalRead(pin_led2)==HIGH;
+    }
+}
+
+
+void setLEDWLAN(bool an){
+  if(pin_ledWLAN>-1){
+    if(pin_ledWLANinvert)an=!an;
+    digitalWrite(pin_ledWLAN, an);
+  }
+}
+void toogleLEDWLAN(){
+  if(pin_ledWLAN>-1)
+    digitalWrite(pin_ledWLAN, !digitalRead(pin_ledWLAN));
+}
+bool getLEDWLAN(){
+  if(pin_ledWLANinvert){
+     return digitalRead(pin_ledWLAN)==LOW;
+    }
+    else{
+     return digitalRead(pin_ledWLAN)==HIGH;
+    }
+}
+
+
+
 void setRelais(bool an){
   if(pin_relaisinvert)an=!an;
   digitalWrite(pin_relais, an);
+  setLED2(an);
 }
 void toogleRelais(){
   digitalWrite(pin_relais, !digitalRead(pin_relais));
+  setLED2(digitalRead(pin_relais));
 }
 
 bool getRelay(){
@@ -194,7 +264,9 @@ bool getButton(){
 //---------------------------------------------
 void connectWLAN(){
    setLED(true);
-  
+   setLED2(false);
+   setLEDWLAN(false);
+        
    anzahlVerbindungsversuche++;
    OTA.setup(WIFI_SSID, WIFI_PASSWORD, ARDUINO_HOSTNAME);//connect to WLAN
    isAPmode=!(WiFi.status() == WL_CONNECTED);
@@ -222,21 +294,29 @@ void connectWLAN(){
 
   if(isAPmode){
       setLED(true);
+      setLEDWLAN(true);
       delay(500);
       setLED(false);
+      setLEDWLAN(false);
       delay(250);
       setLED(true);
+      setLEDWLAN(true);
       delay(500);
       setLED(false);
+      setLEDWLAN(false);
       delay(250);
       setLED(true);
+      setLEDWLAN(true);
       delay(500);
       setLED(false);
+      setLEDWLAN(false);
       delay(250);
     }
     else{
       anzahlVerbindungsversuche=0;//erfolgreich verbunden, Zaehler auf 0 setzen
       setLED(false);
+      setLED2(false);
+      setLEDWLAN(false);
    }
 }
 
@@ -257,9 +337,20 @@ void setup() {
   pinMode(pin_led, OUTPUT);
   pinMode(pin_Button, buttMode); 
 
+ //oxaoxe
+ if(pin_led2>-1){
+    pinMode(pin_led2, OUTPUT);
+ }
+ if(pin_ledWLAN>-1){
+    pinMode(pin_ledWLAN, OUTPUT);
+ }
+ 
   //Power ON:
   setRelais(false);//relay off
+  
   setLED(true);  //LED on
+  setLED2(false);
+  setLEDWLAN(false);
 
   //Initialize HLW8012/ CSE7759
   if(SEL_PIN>-1){
@@ -276,7 +367,8 @@ void setup() {
   //OTA
   OTA.onMessage([](char *message, int line) {
     toogleLED();
-    //digitalWrite(pin_led, !digitalRead(pin_led));//Staus LED blinken
+    setLED2(!getLED());
+    toogleLEDWLAN();
     Serial.println(message);
   });
 
@@ -301,6 +393,9 @@ void setup() {
   
   //info-LED aus
   setLED(false);
+  setLED2(false);
+  setLEDWLAN(false);
+      
   //digitalWrite(pin_led, true);
   Serial.println("ready.");
 
@@ -483,58 +578,44 @@ void checktimer(){
             }
           }
           //Zeilendaten auswerten
-          if(onoff){
-            /*Serial.print("check ");
-            Serial.print(t_st);
-            Serial.print(":");
-            Serial.print(t_min);
-            Serial.print(" ");
-            Serial.print(tage, BIN);
-            Serial.print(" "+befehl+" "+id);
-*/
-            byte maske=0;//uint8_t
-            byte ntp_wochentag=oNtp.getwochentag();
-            byte ntp_stunde=oNtp.getstunde();
-            byte ntp_minute=oNtp.getminute();
-            
-            if(ntp_wochentag==0)maske=1;//Serial.print(" Mo");
-            if(ntp_wochentag==1)maske=2;//Serial.print(" Di");
-            if(ntp_wochentag==2)maske=4;//Serial.print(" Mi");
-            if(ntp_wochentag==3)maske=8;//Serial.print(" Do");
-            if(ntp_wochentag==4)maske=16;//Serial.print(" Fr");
-            if(ntp_wochentag==5)maske=32;//Serial.print(" Sa");
-            if(ntp_wochentag==6)maske=64;//Serial.print(" So");
-            
-            if(tage & maske ){//Serial.print(" isday, ");
+          if(onoff){            
+        byte maske=0;//uint8_t
+        byte ntp_wochentag=oNtp.getwochentag();
+        byte ntp_stunde=oNtp.getstunde();
+        byte ntp_minute=oNtp.getminute();
+        
+        if(ntp_wochentag==0)maske=1;//Serial.print(" Mo");
+        if(ntp_wochentag==1)maske=2;//Serial.print(" Di");
+        if(ntp_wochentag==2)maske=4;//Serial.print(" Mi");
+        if(ntp_wochentag==3)maske=8;//Serial.print(" Do");
+        if(ntp_wochentag==4)maske=16;//Serial.print(" Fr");
+        if(ntp_wochentag==5)maske=32;//Serial.print(" Sa");
+        if(ntp_wochentag==6)maske=64;//Serial.print(" So");
+        
+        if(tage & maske ){//Serial.print(" isday, ");
               if(ntp_stunde==t_st && ntp_minute==t_min){
-                  if(befehl=="ON"){//Serial.println(befehl);  
-                      handleAktion(1, 1);
-                    }
-                    else
-                  if(befehl=="OFF"){//Serial.println(befehl);  
-                      handleAktion(2, 1);
-                    }
-                    else
-                  if(befehl=="LEDON"){//Serial.println(befehl);  
-                      handleAktion(3, 1);
-                    }
-                    else
-                  if(befehl=="LEDOFF"){//Serial.println(befehl);  
-                      handleAktion(4, 1);
-                    }
-                   /* else{
-                      //Serial.print(befehl); 
-                      //Serial.println("  Befehl ungueltig  "); 
-                     }*/
-               }/*else{
-                  Serial.println(" but not time.");
-                }*/
+                  if(befehl=="ON")handleAktion(1, 1);
+                  else
+                  if(befehl=="OFF")handleAktion(2, 1);
+                  else
+                  if(befehl=="LEDON")handleAktion(3, 1);
+                  else
+                  if(befehl=="LEDOFF")handleAktion(4, 1);
+                  else
+                  if(befehl=="LED2ON")handleAktion(5, 1);
+                  else
+                  if(befehl=="LED2OFF")handleAktion(6, 1);
+                  else
+                  if(befehl=="LEDWLANON")handleAktion(7, 1);
+                  else
+                  if(befehl=="LEDWLANOFF")handleAktion(8, 1);
             }
-           /* else
-            Serial.println(" is not the day.");*/
           }
       }
+      
     }
+  }
+  
     file.close();
   }  
 }
@@ -620,6 +701,29 @@ void handleData(){// data.json
              aktionen +="Relais_OFF ";
        }
     }
+
+    if (server.argName(i) == "led2") {
+       if (server.arg(i) == "on" ){
+            handleAktion(5,1);
+            aktionen +="LED2_ON ";
+        }
+       if (server.arg(i) == "off"){
+            handleAktion(6,1);
+            aktionen +="LED2_OFF ";
+       }
+    }
+
+    if (server.argName(i) == "ledwlan") {
+       if (server.arg(i) == "on" ){
+            handleAktion(7,1);
+            aktionen +="LEDWLAN_ON ";
+        }
+       if (server.arg(i) == "off"){
+            handleAktion(8,1);
+            aktionen +="LEDWLAN_OFF ";
+       }
+    }
+    
   }
   
   message +="\"hostname\":\""+String(ARDUINO_HOSTNAME)+"\",\r\n";
@@ -627,6 +731,7 @@ void handleData(){// data.json
   message +="\"progversion\":\""+String(progversion)+"\",\r\n";
   message +="\"cpu_freq\":\""+String(ESP.getCpuFreqMHz())+"\",\r\n";
   message +="\"chip_id\":\""+String(ESP.getChipId())+"\",\r\n";
+  message +="\"flashchiprealsize\":\""+String(ESP.getFlashChipRealSize())+"\",\r\n";
 
   message +="\"isAPmode\":\"";
   if(isAPmode)
@@ -674,12 +779,12 @@ void handleData(){// data.json
          message +="false";
   message +=",\r\n";
   
-  message +="\"button\":";
+  /*message +="\"button\":"; nicht für www relevant, da taster - nur lokale Auswertung
   if(getButton())
          message +="true";
          else
          message +="false";
-  message +=",\r\n";
+  message +=",\r\n";*/
   
   message +="\"led\":";
  
@@ -687,10 +792,26 @@ void handleData(){// data.json
          message +="true";
          else
          message +="false";
-  message +="\r\n";
+
+    //oxaoxe
+     if(pin_led2>-1){
+         message +=",\r\n\"led2\":";
+         if(getLED2())
+              message += "true";
+              else
+              message += "false";
+     }
+     if(pin_ledWLAN>-1){
+         message +=",\r\n\"ledWLAN\":";
+         if(getLEDWLAN())
+              message += "true";
+              else
+              message += "false";
+     }
    
-  message +="},\r\n";
-  
+  message +="\r\n";
+  message +="},\r\n";//Portstatus
+
 
   if(SEL_PIN>-1){
       message +="\"power\":{\r\n";
@@ -868,6 +989,10 @@ void handleAction() {//Rueckgabe JSON
       if (server.arg(i) == "OFF")  AktionBefehl = 2;
       if (server.arg(i) == "LEDON")  AktionBefehl = 3;
       if (server.arg(i) == "LEDOFF")  AktionBefehl = 4;
+      if (server.arg(i) == "LED2ON")  AktionBefehl = 5;
+      if (server.arg(i) == "LED2OFF")  AktionBefehl = 6;
+      if (server.arg(i) == "LEDWLANON")  AktionBefehl = 7;
+      if (server.arg(i) == "LEDWLANOFF")  AktionBefehl = 8;
     }
     
     if (server.argName(i) == "calibrate"){
@@ -892,7 +1017,7 @@ void handleAction() {//Rueckgabe JSON
     
     if (server.argName(i) == "getpin"){
        message += " ,\"val\": \"";
-       if(digitalRead( server.arg(i).toInt()  )==HIGH)
+       if(digitalRead( server.arg(i).toInt())==HIGH)
               message += "true";
               else
               message += "false";
@@ -903,9 +1028,9 @@ void handleAction() {//Rueckgabe JSON
     //setSSID
     //setPassword
 
-    
     message += "}";
   }
+  
   message += "\n]";
 
   if(AktionBefehl>0){
@@ -1028,25 +1153,41 @@ uint8_t handleAktion(uint8_t befehl, uint8_t key) {
   if (key == 1) {
     if (befehl == 1) {//ON
       setRelais(true);
-      re = 1;
+      re = befehl;
     }
     if (befehl == 2) {//OFF
       setRelais(false);
-      re = 2;
+      re = befehl;
     }
     if (befehl == 3) {//LEDON
       setLED(true);
       //digitalWrite(pin_led, false);
-      re = 3;
+      re = befehl;
     }
     if (befehl == 4) {//LEDOFF
       setLED(false);
       //digitalWrite(pin_led,true );
-      re = 4;
+      re = befehl;
+    }
+
+
+    if (befehl == 5) {//LED2ON
+      setLED2(true);
+      re = befehl;
+    }
+    if (befehl == 6) {//LED2OFF
+      setLED2(false);
+      re = befehl;
+    }
+
+    if (befehl == 7) {//LEDWLANON
+      setLEDWLAN(true);
+      re = befehl;
+    }
+    if (befehl == 8) {//LEDWLANOFF
+      setLEDWLAN(false);
+      re = befehl;
     }
   }
   return re;
 }
-
-
-
