@@ -543,18 +543,21 @@ var timerliste=function(){
 			
 			if(jdat.power!=undefined){
 				node=cE(lokdat,"p");
-				node.innerHTML="Active Power (W):"+jdat.power.activepower
-								+' ('+Math.floor(jdat.power.voltage*jdat.power.current)+') '
+				node.innerHTML="Active Power (W):"+jdat.power.activepower;
+				if(jdat.power.activepower>0)
+								node.innerHTML+=' ('+Math.floor(jdat.power.voltage*jdat.power.current)+') '
 								+' ['+(jdat.power.activepower-Math.floor(jdat.power.voltage*jdat.power.current))+'] '
 								;
 				node=cE(lokdat,"p");
-				node.innerHTML="Voltage (V):"+jdat.power.voltage
-								+' ('+Math.floor(jdat.power.activepower/jdat.power.current)+') '
+				node.innerHTML="Voltage (V):"+jdat.power.voltage;
+				if(jdat.power.voltage>0)
+								node.innerHTML+=' ('+Math.floor(jdat.power.activepower/jdat.power.current)+') '
 								+' ['+(jdat.power.voltage-Math.floor(jdat.power.activepower/jdat.power.current))+'] '
 								;
 				node=cE(lokdat,"p");
-				node.innerHTML="Current (A):"+jdat.power.current
-								+' ('+Math.floor(jdat.power.activepower/jdat.power.voltage*100)/100+') '
+				node.innerHTML="Current (A):"+jdat.power.current;
+				if(jdat.power.current>0)
+								node.innerHTML+=' ('+Math.floor(jdat.power.activepower/jdat.power.voltage*100)/100+') '
 								+' ['+Math.floor((jdat.power.current-jdat.power.activepower/jdat.power.voltage)*100 )/100+'] '
 								;
 				node=cE(lokdat,"p");

@@ -117,29 +117,6 @@ const char* progversion  = "WLan-Timer V2.5";//ota fs ntp ti getpin HLW8012
 #define hlw_power_multiplier    129437.79     //122724.46 -> 1879W   x->1849.1  x=129437,79     W=V*A
 
 
-
-//WLAN LED: io4
-//LED rot: io0
-//SW: io13
-//rx + :io3 *
-//???:io14 *
-//???:io2
-//???:io5 *
-//Rlay: io12
-//LED blau:io15
-
-/*
- "typ":"hlw8012",
-  "currentmultiplier":566.00,
-  "voltagemultiplier":15208.52,
-  "powermultiplier":122724.46,
-  "activepower":1753,
-  "voltage":230,
-  "current":7.26,
-  "apparentpower":1759,
-  "powerfactor":94
-*/
-
 //----------------------------------------------------------------------------------------------
 
 //#define WIFI_SSID         ""
