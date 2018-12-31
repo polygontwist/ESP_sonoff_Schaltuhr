@@ -543,11 +543,20 @@ var timerliste=function(){
 			
 			if(jdat.power!=undefined){
 				node=cE(lokdat,"p");
-				node.innerHTML="Active Power (W):"+jdat.power.activepower;
+				node.innerHTML="Active Power (W):"+jdat.power.activepower
+								+' ('+Math.floor(jdat.power.voltage*jdat.power.current)+') '
+								+' ['+(jdat.power.activepower-Math.floor(jdat.power.voltage*jdat.power.current))+'] '
+								;
 				node=cE(lokdat,"p");
-				node.innerHTML="Voltage (V):"+jdat.power.voltage;
+				node.innerHTML="Voltage (V):"+jdat.power.voltage
+								+' ('+Math.floor(jdat.power.activepower/jdat.power.current)+') '
+								+' ['+(jdat.power.voltage-Math.floor(jdat.power.activepower/jdat.power.current))+'] '
+								;
 				node=cE(lokdat,"p");
-				node.innerHTML="Current (A):"+jdat.power.current;
+				node.innerHTML="Current (A):"+jdat.power.current
+								+' ('+Math.floor(jdat.power.activepower/jdat.power.voltage*100)/100+') '
+								+' ['+Math.floor((jdat.power.current-jdat.power.activepower/jdat.power.voltage)*100 )/100+'] '
+								;
 				node=cE(lokdat,"p");
 				node.innerHTML="Apparent Power (VA):"+jdat.power.apparentpower;
 				node=cE(lokdat,"p");

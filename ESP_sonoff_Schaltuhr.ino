@@ -51,6 +51,18 @@ const char* progversion  = "WLan-Timer V2.5";//ota fs ntp ti getpin HLW8012
 #define SEL_PIN   -1     //-= kein
 #define CF1_PIN   -1
 #define CF_PIN    -1
+
+//hlw8012 / CSE7759 setup
+#define CURRENT_MODE HIGH
+#define CURRENT_RESISTOR                0.001
+#define VOLTAGE_RESISTOR_UPSTREAM       ( 5 * 470000 ) // Real: 2280k
+#define VOLTAGE_RESISTOR_DOWNSTREAM     ( 1000 ) // Real 1.009k
+
+#define hlw_current_multiplier   144844.93
+#define hlw_voltage_multiplier   408636.51
+#define hlw_power_multiplier   10343611.74
+
+
 //----------------------------------------------------------------------------------------------
 /*
 #define ARDUINO_HOSTNAME  "sonoffpow" //http://sonoffpow.wg
@@ -65,14 +77,14 @@ const char* progversion  = "WLan-Timer V2.5";//ota fs ntp ti getpin HLW8012
 #define CF_PIN    14
 */
 
-
+/*
 #define ARDUINO_HOSTNAME  "sonoffs20" //V2.5  http://sonoffs20.wg ->anlage
 //#define ARDUINO_HOSTNAME  "dose2" //V2.5 http://dose2.wg 32x32
 //#define ARDUINO_HOSTNAME  "lampe" //V2.5  http://lampe.wg (dose3)
 #define pin_relais 12               //blue+relais   true=on
 #define pin_led 13                  //green         false=on      
 #define pin_Button 0                //Button        LOW=down  
-/**/
+*/
 
 /*
 #define ARDUINO_HOSTNAME  "horsky"// V2.5 ->usb-Strom
@@ -88,27 +100,45 @@ const char* progversion  = "WLan-Timer V2.5";//ota fs ntp ti getpin HLW8012
 #define pin_Button 13             //Button
 */
 
-/*
+/**/
 #define ARDUINO_HOSTNAME  "oxaoxe"// V2.5
 #define pin_relais 12             //relais  
-#define pin_led 0                 //green
+#define pin_led 0                 //LED rot
 #define pin_Button 13             //Button
-#define pin_led2 15
-#define pin_led2invert true   //false=on      
-#define pin_ledWLAN 4
-#define pin_ledWLANinvert true   //false=on      
-*/
+#define pin_led2 15               //LED blau
+#define pin_led2invert true       //false=on      
+#define pin_ledWLAN 4             //LED blau WLAN
+#define pin_ledWLANinvert true    //false=on      
+#define SEL_PIN    3              //strom/voltsensor
+#define CF1_PIN   14
+#define CF_PIN    5
+#define hlw_current_multiplier     555.35     //571.90 ->7.73A   x->8.130A(8)                   A=W/V
+#define hlw_voltage_multiplier   17066.45     //16101.83 -> 218V   x->231  x=17066.45           V=W/A
+#define hlw_power_multiplier    129437.79     //122724.46 -> 1879W   x->1849.1  x=129437,79     W=V*A
+
+
 
 //WLAN LED: io4
 //LED rot: io0
 //SW: io13
-//???:io14
+//rx + :io3 *
+//???:io14 *
 //???:io2
-//???:io5
+//???:io5 *
 //Rlay: io12
 //LED blau:io15
 
-
+/*
+ "typ":"hlw8012",
+  "currentmultiplier":566.00,
+  "voltagemultiplier":15208.52,
+  "powermultiplier":122724.46,
+  "activepower":1753,
+  "voltage":230,
+  "current":7.26,
+  "apparentpower":1759,
+  "powerfactor":94
+*/
 
 //----------------------------------------------------------------------------------------------
 
@@ -149,11 +179,6 @@ ESP8266WebServer server(80);
 File fsUploadFile;                      //Haelt den aktuellen Upload
 
 
-//hlw8012 / CSE7759 setup
-#define CURRENT_MODE HIGH
-#define CURRENT_RESISTOR                0.001
-#define VOLTAGE_RESISTOR_UPSTREAM       ( 5 * 470000 ) // Real: 2280k
-#define VOLTAGE_RESISTOR_DOWNSTREAM     ( 1000 ) // Real 1.009k
 
 HLW8012 hlw8012;
 
@@ -354,13 +379,18 @@ void setup() {
 
   //Initialize HLW8012/ CSE7759
   if(SEL_PIN>-1){
-    hlw8012.begin(CF_PIN, CF1_PIN, SEL_PIN, CURRENT_MODE, false, 500000);
-    hlw8012.setResistors(CURRENT_RESISTOR, VOLTAGE_RESISTOR_UPSTREAM, VOLTAGE_RESISTOR_DOWNSTREAM);
+    hlw8012.begin(CF_PIN, CF1_PIN, SEL_PIN, CURRENT_MODE, false, 500000);  //500000microseconds
+    
+    hlw8012.setCurrentMultiplier(hlw_current_multiplier);
+    hlw8012.setVoltageMultiplier(hlw_voltage_multiplier);
+    hlw8012.setPowerMultiplier(hlw_power_multiplier);
+ 
+    //hlw8012.setResistors(CURRENT_RESISTOR, VOLTAGE_RESISTOR_UPSTREAM, VOLTAGE_RESISTOR_DOWNSTREAM);
+                          //0.001,( 5 * 470000 ),( 1000 ) 
+      //_current_multiplier = 144844.93
+      //_voltage_multiplier = 408636.51
+      //_power_multiplier =  10343611.74
 
-    Serial.print("[HLW] Default current multiplier : "); Serial.println(hlw8012.getCurrentMultiplier());// 14484.49    14484.49
-    Serial.print("[HLW] Default voltage multiplier : "); Serial.println(hlw8012.getVoltageMultiplier());//408636.51   447554.28
-    Serial.print("[HLW] Default power multiplier   : "); Serial.println(hlw8012.getPowerMultiplier());//10343611.74 10343611.74
-    Serial.println(); 
   }
 
 
@@ -480,6 +510,18 @@ void loop() {
       Serial.print("[HLW] Apparent Power (VA) : "); Serial.println(hlw8012.getApparentPower());
       Serial.print("[HLW] Power Factor (%)    : "); Serial.println((int) (100 * hlw8012.getPowerFactor()));
       Serial.println();
+      
+      "typ":"hlw8012",
+      "currentmultiplier":14484.49,
+      "voltagemultiplier":408636.51,      //
+      "powermultiplier":10343611.74,
+      "activepower":147765,
+      "voltage":5238,                     226V
+      "current":185.70,
+      "apparentpower":972689,
+      "powerfactor":13
+      
+      
       */
       // When not using interrupts we have to manually switch to current or voltage monitor
        hlw8012.toggleMode();
@@ -625,12 +667,35 @@ void unblockingDelay(unsigned long mseconds) {
     unsigned long timeout = millis();
     while ((millis() - timeout) < mseconds) delay(1);
 }
-void calibrate(float last) {
+void calibrate(float watt, float volt) {
+
+   //setResistors & _calculateDefaultMultipliers
+   
+   //hlw8012.setResistors(CURRENT_RESISTOR, VOLTAGE_RESISTOR_UPSTREAM, VOLTAGE_RESISTOR_DOWNSTREAM);
+                          //0.001,( 5 * 470000 ),( 1000 ) 
+      //_current_multiplier = 144844.93  // A
+      //_voltage_multiplier = 408636.51  // V
+      //_power_multiplier =  10343611.74 // W
+
+    /*
+          0.001       ->_current_multiplier = ( 1000000.0 * 512 * V_REF / _current_resistor / 24.0 / F_OSC );
+          5 * 470000 
+          1000
+
+          _current_resistor = 0.001;
+          _voltage_resistor = (5 * 470000 + 1000) / 1000; -> 2351
+
+
+          _current_multiplier = ( 1000000.0 * 512 * 2.43 / _current_resistor / 24.0 / 3579000 );                          ->144844.93
+          _voltage_multiplier = ( 1000000.0 * 512 * 2.43 * _voltage_resistor / 2.0 / 3579000 );                           ->408636.51
+          _power_multiplier = ( 1000000.0 * 128 * 2.43 * 2.43 * _voltage_resistor / _current_resistor / 48.0 / 3579000 ); ->10343611.74
+          
+    */
     // Let's first read power, current and voltage
     // with an interval in between to allow the signal to stabilise:
 
     hlw8012.getActivePower();
-
+   
     hlw8012.setMode(MODE_CURRENT);
     unblockingDelay(2000);
     hlw8012.getCurrent();
@@ -640,31 +705,10 @@ void calibrate(float last) {
     hlw8012.getVoltage();
 
     // Calibrate using a 60W bulb (pure resistive) on a 230V line
-    hlw8012.expectedActivePower(last);//
-    hlw8012.expectedVoltage(230.0);
-    hlw8012.expectedCurrent(last / 230.0);
+    hlw8012.expectedActivePower(watt);  //   60.0W
+    hlw8012.expectedVoltage(volt);      //  230.0V
+    hlw8012.expectedCurrent(watt / volt);// 60.0/230  -> 0.26 A
 
-    // Show corrected factors
-    Serial.print("[HLW] New current multiplier : "); Serial.println(hlw8012.getCurrentMultiplier());
-    Serial.print("[HLW] New voltage multiplier : "); Serial.println(hlw8012.getVoltageMultiplier());
-    Serial.print("[HLW] New power multiplier   : "); Serial.println(hlw8012.getPowerMultiplier());
-    Serial.println();
-
-    /*
-    //   14484.49    
-    //  408636.51  
-    //10343611.74 
-
-    14w
-    "currentmultiplier":14484.49,
-    "voltagemultiplier":447554.28,
-    "powermultiplier":10343611.74
-
-    2000w
-    "currentmultiplier":   17513.04,
-    "voltagemultiplier":  463682.36,
-    "powermultiplier":  13485804.09,
-    */
 }
 
 
@@ -848,6 +892,15 @@ void handleData(){// data.json
        
        message +="  \"powerfactor\":";
        message +=String((int) (100 * hlw8012.getPowerFactor()));//%
+       message +=",\r\n";
+
+       
+       message +="  \"reactivepower\":";
+       message +=String((int) (hlw8012.getReactivePower()));
+       message +=",\r\n";
+       
+       message +="  \"energy\":";
+       message +=String(hlw8012.getEnergy());//in Ws
        message +="\r\n";
        
 /*      Serial.print("[HLW] Active Power (W)    : "); Serial.println(hlw8012.getActivePower());
@@ -971,7 +1024,7 @@ void handleAction() {//Rueckgabe JSON
       /action?sonoff=LEDON    LED einschalten
       /action?sonoff=LEDOFF   LED ausschalten
       /action?getpin=0        aktuellen Status von Pin IO0
-      /action?calibrate=60    SonoffPow mit 60W Gluehbirne kalibrieren
+      /action?calibrate=60&v=230    SonoffPow mit 60W Gluehbirne kalibrieren, auf 230V
   */
   String message = "{\n";
   message += "\"Arguments\":[\n";
@@ -979,6 +1032,8 @@ void handleAction() {//Rueckgabe JSON
   uint8_t AktionBefehl = 0;
   uint8_t keyOK = 0;
   uint8_t aktionresult = 0;
+  float volt=0.0;
+  float watt=0.0;
 
   for (uint8_t i = 0; i < server.args(); i++) {
     if (i > 0) message += ",\n";
@@ -995,11 +1050,32 @@ void handleAction() {//Rueckgabe JSON
       if (server.arg(i) == "LEDWLANOFF")  AktionBefehl = 8;
     }
     
-    if (server.argName(i) == "calibrate"){
+    if (server.argName(i) == "calibrate"){//  IP/action?calibrate=1&volt=230&watt=100
        if(SEL_PIN>-1){
-          calibrate( server.arg(i).toFloat() );
+        
+          for (uint8_t i2 = 0; i2 < server.args(); i2++) {
+              if(server.argName(i2) == "volt"){
+                  volt=server.arg(i2).toFloat();
+                }
+             if(server.argName(i2) == "watt"){
+                  watt=server.arg(i2).toFloat();
+                }
+          }
+
+          if(volt>0 && watt>0 )
+            calibrate(watt ,volt );
           
-          message +=",  \"currentmultiplier\":";
+          message +=",\r\n ";
+          
+          message +="   \"watt\":";
+          message +=String(watt);
+          message +=",\r\n";
+         
+          message +="   \"volt\":";
+          message +=String(volt);
+          message +=",\r\n";
+         
+          message +="   \"currentmultiplier\":";
           message +=String(hlw8012.getCurrentMultiplier());
           message +=",\r\n";
           
