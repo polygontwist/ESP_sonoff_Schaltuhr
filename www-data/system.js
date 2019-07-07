@@ -457,7 +457,7 @@ var timerliste=function(){
 	}
 	
 	var changetimekorr=function(e){
-		var val=this.value*60*60;//in sekunden
+		var val=this.value;//in Stunden
 		//console.log(">>>",val);
 		getpostData(dateisysinfo+'?settimekorr='+val,
 			function(d){
