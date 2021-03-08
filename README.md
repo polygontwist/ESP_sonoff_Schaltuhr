@@ -1,4 +1,4 @@
-# Projekt: Wifi Schaltuhr Version 2.4
+# Projekt: Wifi Schaltuhr Version 2.5
 
 Alternative Firmware für WLAN-Steckdosen (Sonoff, Horsky, Lingan SWA1) mit folgenden Funktionen:
 * Schalten per WLAN-Verbindung
